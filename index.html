@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบสมาชิกหอการค้าจังหวัดปราจีนบุรี</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dist/jquery.Thailand.min.css">
+    <script type="text/javascript" src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dependencies/JQL.min.js"></script>
+    <script type="text/javascript" src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dependencies/typeahead.bundle.js"></script>
+    <script type="text/javascript" src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dist/jquery.Thailand.min.js"></script>
+
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #f1f5f9; }
+        .step-content { display: none; }
+        .step-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .form-input { width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; outline: none; transition: all 0.2s; }
+        .form-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .btn-primary { background-color: #1e40af; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 500; transition: all 0.2s; }
+        .btn-primary:hover:not(:disabled) { background-color: #1e3a8a; }
+        .admin-tab { cursor: pointer; padding: 1rem; text-align: center; border-bottom: 2px solid transparent; color: #64748b; font-weight: 500; font-size: 0.9rem; transition: all 0.2s;}
+        .admin-tab.active { color: #1e40af; border-bottom-color: #1e40af; background-color: #eff6ff; font-weight:bold;}
+        .tt-menu { background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.375rem; width: 100%; max-height: 250px; overflow-y: auto; z-index: 50; }
+        .tt-suggestion { padding: 0.5rem 1rem; cursor: pointer; }
+        .tt-suggestion:hover { background-color: #f3f4f6; color: #1e40af; }
+    </style>
+</head>
+<body class="min-h-screen pb-10">
+
+    <div class="bg-blue-900 text-white py-6 shadow-lg mb-8">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-2xl md:text-3xl font-bold">ระบบลงทะเบียนสมาชิกหอการค้าจังหวัดปราจีนบุรี</h1>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 max-w-5xl">
+        <div id="user-view" class="bg-white rounded-2xl shadow-xl p-6 md:p-10">
+            
+            <div id="step1" class="step-content active">
+                <h2 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2"><i class="fas fa-search mr-2"></i> ตรวจสอบสถานะสมาชิก / ชำระเงิน</h2>
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <label class="block mb-2 font-medium text-gray-700">กรอกเลข 13 หลัก (เลขบัตรประชาชน / เลขนิติบุคคล)</label>
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <input type="tel" id="checkId" class="form-input text-xl font-mono" maxlength="13" placeholder="0000000000000">
+                        <button type="button" id="btnCheck" onclick="handleCheck()" class="btn-primary whitespace-nowrap shadow-md"><i class="fas fa-search mr-1"></i> ตรวจสอบ</button>
+                    </div>
+                    <div id="checkMsg" class="mt-4"></div>
+                </div>
+
+                <div id="typeSelection" class="hidden mt-8 bg-slate-50 p-6 md:p-8 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-xl font-bold mb-6 text-center text-gray-800 border-b pb-3"><i class="fas fa-list-check mr-2"></i>เลือกประเภทการสมัคร</h3>
+                    
+                    <div class="mb-6">
+                        <label class="block font-medium text-gray-700 mb-3 text-lg">1. ประเภทสมาชิก <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="flex items-center p-3 bg-white border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition">
+                                <input type="radio" name="memCategory" value="สมาชิกสามัญ" class="w-5 h-5 text-blue-600 mr-3" checked>
+                                <span class="font-medium text-gray-800">สมาชิกสามัญ</span>
+                            </label>
+                            <label class="flex items-center p-3 bg-white border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition">
+                                <input type="radio" name="memCategory" value="สมาชิกวิสามัญ" class="w-5 h-5 text-blue-600 mr-3">
+                                <span class="font-medium text-gray-800">สมาชิกวิสามัญ</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <label class="block font-medium text-gray-700 mb-3 text-lg">2. สมัครในนาม (รูปแบบ) <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="flex items-center p-3 bg-white border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition">
+                                <input type="radio" name="memType" value="บุคคล" class="w-5 h-5 text-blue-600 mr-3">
+                                <span class="font-medium text-gray-800"><i class="fas fa-user text-gray-400 w-5 text-center mr-1"></i> บุคคลธรรมดา</span>
+                            </label>
+                            <label class="flex items-center p-3 bg-white border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition">
+                                <input type="radio" name="memType" value="นิติบุคคล" class="w-5 h-5 text-blue-600 mr-3">
+                                <span class="font-medium text-gray-800"><i class="fas fa-building text-gray-400 w-5 text-center mr-1"></i> นิติบุคคล</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="confirmSelection()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition text-lg">
+                        ถัดไป (กรอกข้อมูล) <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="step4" class="step-content">
+                <h2 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2"><i class="fas fa-file-alt mr-2"></i> กรอกข้อมูลสมาชิก</h2>
+                
+                <div id="form-personal" class="space-y-6 hidden">
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <h3 class="font-bold text-blue-800 mb-4 border-b pb-2"><i class="fas fa-user mr-2"></i>ข้อมูลส่วนตัว</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div><label class="block text-sm font-medium mb-1">คำนำหน้า *</label><select id="title" class="form-input"><option value="">- เลือก -</option><option value="นาย">นาย</option><option value="นาง">นาง</option><option value="นางสาว">นางสาว</option></select></div>
+                            <div><label class="block text-sm font-medium mb-1">ชื่อ *</label><input type="text" id="firstName" class="form-input"></div>
+                            <div><label class="block text-sm font-medium mb-1">นามสกุล</label><input type="text" id="lastName" class="form-input"></div>
+                            <div><label class="block text-sm font-medium mb-1">สัญชาติ</label><input type="text" id="nationality" class="form-input" value="ไทย"></div>
+                            <div><label class="block text-sm font-medium mb-1">วันหมดอายุบัตร</label><input type="date" id="idExpiryDate" class="form-input"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <h3 class="font-bold text-blue-800 mb-4 border-b pb-2"><i class="fas fa-home mr-2"></i>ที่อยู่ตามทะเบียนบ้าน</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="md:col-span-3"><label class="block text-sm font-medium mb-1">เลขที่ *</label><input type="text" id="address" class="form-input"></div>
+                            <div class="md:col-span-1"><label class="block text-sm font-medium mb-1">หมู่ที่</label><input type="text" id="moo" class="form-input"></div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-1">ตำบล *</label>
+                                <input type="text" id="subdistrict" class="form-input">
+                                <p class="text-[11px] text-blue-500 mt-1"><i class="fas fa-info-circle"></i> แค่กรอกตำบล อำเภอและจังหวัดจะขึ้นให้อัตโนมัติ</p>
+                            </div>
+                            <div class="md:col-span-1"><label class="block text-sm font-medium mb-1">อำเภอ *</label><input type="text" id="district" class="form-input"></div>
+                            <div class="md:col-span-1"><label class="block text-sm font-medium mb-1">จังหวัด *</label><input type="text" id="province" class="form-input"></div>
+                            <div class="md:col-span-4"><label class="block text-sm font-medium mb-1">รหัสไปรษณีย์ *</label><input type="text" id="zipcode" class="form-input w-full md:w-1/4"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <h3 class="font-bold text-blue-800 mb-4 border-b pb-2"><i class="fas fa-address-book mr-2"></i>ข้อมูลการติดต่อ</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">เบอร์มือถือ (10 หลัก) *</label>
+                                <input type="tel" id="mobile" class="form-input" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="validatePhoneUI(this)">
+                                <p id="mobile-error" class="text-[11px] text-red-500 mt-1 hidden font-medium"><i class="fas fa-times-circle"></i> ต้องระบุตัวเลข 10 หลัก และขึ้นต้นด้วย 0</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">E-Mail *</label>
+                                <input type="email" id="email" class="form-input" onblur="validateEmailUI(this)">
+                                <p id="email-error" class="text-[11px] text-red-500 mt-1 hidden font-medium"><i class="fas fa-times-circle"></i> รูปแบบอีเมลไม่ถูกต้อง (เช่น name@example.com)</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Line ID</label>
+                                <input type="text" id="lineId" class="form-input" onblur="validateSocialUI(this, 'line')">
+                                <p id="lineId-error" class="text-[11px] text-orange-500 mt-1 hidden font-medium"><i class="fas fa-exclamation-triangle"></i> Line ID ควรเป็นตัวอักษรภาษาอังกฤษหรือตัวเลข</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Facebook</label>
+                                <input type="text" id="facebook" class="form-input" value="-">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-1">Website</label>
+                                <input type="text" id="website" class="form-input" value="-" onblur="validateSocialUI(this, 'web')">
+                                <p id="website-error" class="text-[11px] text-orange-500 mt-1 hidden font-medium"><i class="fas fa-exclamation-triangle"></i> รูปแบบเว็บไซต์ควรมี www. หรือ http</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="form-corporate" class="space-y-6 hidden">
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <h3 class="font-bold text-purple-800 mb-4 border-b pb-2"><i class="fas fa-building mr-2"></i>ข้อมูลกิจการ</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-medium mb-1">รูปแบบกิจการ *</label><select id="corpType" class="form-input"><option value="">- เลือก -</option><option value="บริษัทจำกัด">บริษัทจำกัด</option><option value="ห้างหุ้นส่วนจำกัด">ห้างหุ้นส่วนจำกัด</option><option value="ห้างหุ้นส่วนสามัญ">ห้างหุ้นส่วนสามัญ</option><option value="องค์กร/มูลนิธิ">องค์กร/มูลนิธิ</option></select></div>
+                            <div><label class="block text-sm font-medium mb-1">ชื่อกิจการ *</label><input type="text" id="corpName" class="form-input"></div>
+                            <div><label class="block text-sm font-medium mb-1">ประเภทธุรกิจ *</label><input type="text" id="businessType" class="form-input" placeholder="เช่น ร้านอาหาร, รับเหมาก่อสร้าง"></div>
+                            <div><label class="block text-sm font-medium mb-1">ชื่อยี่ห้อ-ผลิตภัณฑ์</label><input type="text" id="brandName" class="form-input" value="-"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <h3 class="font-bold text-purple-800 mb-4 border-b pb-2"><i class="fas fa-map-marker-alt mr-2"></i>ที่อยู่กิจการ</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="md:col-span-3"><label class="block text-sm font-medium mb-1">เลขที่ ตั้งกิจการ *</label><input type="text" id="addressCorp" class="form-input"></div>
+                            <div class="md:col-span-1"><label class="block text-sm font-medium mb-1">หมู่ที่</label><input type="text" id="mooCorp" class="form-input"></div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-1">ตำบล *</label>
+                                <input type="text" id="subdistrictCorp" class="form-input">
+                                <p class="text-[11px] text-blue-500 mt-1"><i class="fas fa-info-circle"></i> แค่กรอกตำบล อำเภอและจังหวัดจะขึ้นให้อัตโนมัติ</p>
+                            </div>
+                            <div class="md:col-span-1"><label class="block text-sm font-medium mb-1">อำเภอ *</label><input type="text" id="districtCorp" class="form-input"></div>
+                            <div class="md:col-span-1"><label class="block text-sm font-medium mb-1">จังหวัด *</label><input type="text" id="provinceCorp" class="form-input"></div>
+                            <div class="md:col-span-4"><label class="block text-sm font-medium mb-1">รหัสไปรษณีย์ *</label><input type="text" id="zipcodeCorp" class="form-input w-full md:w-1/4"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <h3 class="font-bold text-purple-800 mb-4 border-b pb-2"><i class="fas fa-phone-alt mr-2"></i>ข้อมูลการติดต่อ (ส่วนกลางกิจการ)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">เบอร์โทรมือถือ (กิจการ) *</label>
+                                <input type="tel" id="mobileCorp" class="form-input" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="validatePhoneUI(this)">
+                                <p id="mobileCorp-error" class="text-[11px] text-red-500 mt-1 hidden font-medium"><i class="fas fa-times-circle"></i> ต้องระบุตัวเลข 10 หลัก และขึ้นต้นด้วย 0</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">E-Mail (กิจการ) *</label>
+                                <input type="email" id="emailCorp" class="form-input" onblur="validateEmailUI(this)">
+                                <p id="emailCorp-error" class="text-[11px] text-red-500 mt-1 hidden font-medium"><i class="fas fa-times-circle"></i> รูปแบบอีเมลไม่ถูกต้อง</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Line ID (กิจการ)</label>
+                                <input type="text" id="lineCorp" class="form-input" onblur="validateSocialUI(this, 'line')">
+                                <p id="lineCorp-error" class="text-[11px] text-orange-500 mt-1 hidden font-medium"><i class="fas fa-exclamation-triangle"></i> Line ID ควรเป็นตัวอักษรภาษาอังกฤษหรือตัวเลข</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Facebook (กิจการ)</label>
+                                <input type="text" id="facebookCorp" class="form-input" value="-">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-1">Website</label>
+                                <input type="text" id="websiteCorp" class="form-input" value="-" onblur="validateSocialUI(this, 'web')">
+                                <p id="websiteCorp-error" class="text-[11px] text-orange-500 mt-1 hidden font-medium"><i class="fas fa-exclamation-triangle"></i> รูปแบบเว็บไซต์ควรมี www. หรือ http</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <h3 class="font-bold text-purple-800 mb-4 border-b pb-2"><i class="fas fa-user-tie mr-2"></i>ผู้ติดต่อประสานงาน *</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div><label class="block text-sm font-medium mb-1">คำนำหน้า</label><select id="title1" class="form-input"><option value="">- เลือก -</option><option value="นาย">นาย</option><option value="นาง">นาง</option><option value="นางสาว">นางสาว</option></select></div>
+                            <div><label class="block text-sm font-medium mb-1">ชื่อ *</label><input type="text" id="fname1" class="form-input"></div>
+                            <div><label class="block text-sm font-medium mb-1">นามสกุล *</label><input type="text" id="lname1" class="form-input"></div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">เลขบัตรประชาชน (13 หลัก) *</label>
+                                <input type="tel" id="idCard1" class="form-input" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="validateCoordinatorID(this)">
+                                <p id="idCard1-error" class="text-[11px] text-red-500 mt-1 hidden font-medium"><i class="fas fa-times-circle"></i> เลขบัตรประชาชนไม่ถูกต้อง</p>
+                            </div>
+                            <div><label class="block text-sm font-medium mb-1">ตำแหน่ง *</label><input type="text" id="pos1" class="form-input"></div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">เบอร์โทร *</label>
+                                <input type="tel" id="phone1" class="form-input" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="validatePhoneUI(this)">
+                                <p id="phone1-error" class="text-[11px] text-red-500 mt-1 hidden font-medium"><i class="fas fa-times-circle"></i> ต้องระบุตัวเลข 10 หลัก และขึ้นต้นด้วย 0</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Line ID</label>
+                                <input type="text" id="line1" class="form-input" onblur="validateSocialUI(this, 'line')">
+                                <p id="line1-error" class="text-[11px] text-orange-500 mt-1 hidden font-medium"><i class="fas fa-exclamation-triangle"></i> Line ID ควรเป็นตัวอักษรภาษาอังกฤษหรือตัวเลข</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-1">E-Mail (ผู้ติดต่อ) *</label>
+                                <input type="email" id="email1" class="form-input" onblur="validateEmailUI(this)">
+                                <p id="email1-error" class="text-[11px] text-red-500 mt-1 hidden font-medium"><i class="fas fa-times-circle"></i> รูปแบบอีเมลไม่ถูกต้อง</p>
+                            </div>
+                        </div>                      
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 p-5 rounded-xl border border-blue-200 mt-8 shadow-sm">
+                    <label class="flex items-start cursor-pointer">
+                        <input type="checkbox" id="pdpaConsent" class="mt-1 w-5 h-5 text-blue-600 rounded cursor-pointer">
+                        <span class="ml-3 text-sm text-gray-700 leading-relaxed">
+                            <b class="text-blue-900">นโยบายการคุ้มครองข้อมูลส่วนบุคคล (PDPA) <span class="text-red-500">*</span></b><br>
+                            ข้าพเจ้ายินยอมให้หอการค้าจังหวัดปราจีนบุรี เก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลที่ให้ไว้ เพื่อวัตถุประสงค์ในการขึ้นทะเบียนสมาชิก การติดต่อประสานงาน และการแจ้งข้อมูลข่าวสารของหอการค้าฯ ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562
+                        </span>
+                    </label>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button type="button" onclick="handlePreview()" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-md transition"><i class="fas fa-search mr-2"></i> ตรวจสอบข้อมูลก่อนส่ง</button>
+                </div>
+            </div>
+
+            <div id="step-preview" class="step-content">
+                <h2 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2"><i class="fas fa-clipboard-check mr-2"></i> ตรวจสอบข้อมูลก่อนส่ง</h2>
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-6 shadow-sm">
+                    <p class="text-blue-800 font-medium"><i class="fas fa-info-circle mr-1"></i> กรุณาตรวจสอบความถูกต้องของข้อมูลด้านล่าง หากถูกต้องแล้วและกด ยืนยันข้อมูลถูกต้อง</p>
+                </div>
+                
+                <div id="preview-data-area" class="mb-6"></div>
+
+                <div class="flex flex-col sm:flex-row justify-between gap-4">
+                    <button type="button" onclick="goTo(4)" class="bg-gray-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-600 shadow-md transition"><i class="fas fa-edit mr-2"></i> กลับไปแก้ไขข้อมูล</button>
+                    <button type="button" id="btnConfirmSave" onclick="confirmAndSave()" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-md transition"><i class="fas fa-paper-plane mr-2"></i> ยืนยันข้อมูลถูกต้อง</button>
+                </div>
+            </div>
+
+            <div id="step5" class="step-content">
+                <h2 class="text-xl font-bold mb-6 text-center text-blue-900"><i class="fas fa-money-bill-wave mr-2"></i> ชำระค่าสมาชิกหอการค้า</h2>
+                <div class="max-w-md mx-auto text-center">
+                    
+                    <p class="text-gray-600 font-medium">ยอดที่ต้องชำระ (รวมเศษสตางค์)</p>
+                    <p class="text-4xl md:text-5xl font-bold text-blue-900 mt-2 mb-4"><span id="displayFee">0.00</span> บาท</p>
+                    
+                    <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4 shadow-sm mb-6 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+                        <p class="text-red-700 font-bold text-sm md:text-base leading-relaxed">
+                            <i class="fas fa-bullhorn text-xl block mb-2 text-red-600 animate-pulse"></i>
+                            เพื่อง่ายต่อการตรวจสอบรายการชำระเงิน<br>
+                            <span class="text-red-600 underline decoration-red-400 decoration-2">กรุณาโอนเงินตามจำนวน "พร้อมเศษสตางค์"</span><br>เพื่อการตรวจเนื่องจากมีจำนวนเงินโอนเป็นจำนวนมาก
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-2xl border mb-6 shadow-sm">
+                        <p class="font-bold text-gray-800">ธนาคารไทยพาณิชย์</p>
+                        <p class="text-2xl font-bold text-blue-700 my-2 tracking-widest">426-095203-3</p>
+                        <p class="text-sm text-gray-500">ชื่อบัญชี: หอการค้าจังหวัดปราจีนบุรี</p>
+                    </div>
+                    
+                    <label class="block text-left font-medium text-sm mb-2 text-gray-700">แนบสลิปโอนเงิน *</label>
+                    <input type="file" id="slip" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold hover:file:bg-blue-100 mb-6 transition" accept="image/*">
+                    <button type="button" onclick="handlePayment()" class="w-full btn-primary py-3 shadow-md text-lg"><i class="fas fa-upload mr-2"></i> แจ้งโอนเงิน</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="admin-view" class="hidden mt-10">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div id="admin-tabs-container" class="grid grid-cols-4 bg-slate-50 border-b">
+                    <div id="btn-dash" class="admin-tab active relative" onclick="switchAdmin('dash')">
+                        <i class="fas fa-chart-pie block mb-1 text-lg"></i> แดชบอร์ด
+                    </div>
+                    <div id="btn-reg1" class="admin-tab relative" onclick="switchAdmin('reg1')">
+                        <i class="fas fa-user-clock block mb-1 text-lg"></i> (1) นายทะเบียน<br><span class="text-[10px] font-normal text-gray-500">อนุมัติรายชื่อ</span>
+                        <span id="badge-reg1" class="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden shadow-md">0</span>
+                    </div>
+                    <div id="btn-tre" class="admin-tab relative" onclick="switchAdmin('tre')">
+                        <i class="fas fa-coins block mb-1 text-lg"></i> (2) เหรัญญิก<br><span class="text-[10px] font-normal text-gray-500">ตรวจสลิป</span>
+                        <span id="badge-tre" class="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden shadow-md">0</span>
+                    </div>
+                    <div id="btn-reg2" class="admin-tab relative" onclick="switchAdmin('reg2')">
+                        <i class="fas fa-id-card block mb-1 text-lg"></i> (3) นายทะเบียน<br><span class="text-[10px] font-normal text-gray-500">ออกรหัส&PDF</span>
+                        <span id="badge-reg2" class="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden shadow-md">0</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div id="admin-content"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-6">
+            <button type="button" onclick="toggleAdmin()" class="text-slate-400 text-sm hover:text-slate-600 transition"><i class="fas fa-lock mr-1"></i> ระบบเจ้าหน้าที่</button>
+        </div>
+    </div>
+
+    <footer class="mt-12 border-t border-gray-300 pt-6 pb-2 text-center text-sm text-gray-500">
+            <p class="font-medium text-blue-900 text-base mb-1">หอการค้าจังหวัดปราจีนบุรี @2026</p>
+            <p>โดย นพดล เจียมเลิศประเสริฐ</p>
+            <p class="text-xs mt-0.5">รองประธานฯ ฝ่ายนวัตกรรมดิจิทัลและเทคโนโลยีขั้นสูง</p>
+    </footer>
+
+    <script>
+        // =========================================================================
+        // 🚀 ส่วนที่ 1: ระบบแปลงคำสั่ง google.script.run ให้วิ่งผ่าน API ของ Vercel
+        // =========================================================================
+        
+        // 🔴🔴🔴 สำคัญมาก: นำ URL ของ Web App จาก Google Apps Script (ที่ลงท้ายด้วย /exec) มาวางตรงนี้ 🔴🔴🔴
+        const API_URL = "https://script.google.com/macros/s/AKfycbz1WlXImo-QcUA_1fJW02gtMRuf-x3bikimwd28QlHFGPJ1wJHV2gdBPtaPcZxQAoAk-A/exec";
+
+        const google = {
+            script: {
+                run: new Proxy({}, {
+                    get: function(target, prop) {
+                        if (prop === 'withSuccessHandler') return function(callback) { return createRunner(callback, null); };
+                        if (prop === 'withFailureHandler') return function(callback) { return createRunner(null, callback); };
+                        return function(...args) { createRunner(null, null)[prop](...args); }
+                    }
+                })
+            }
+        };
+
+        function createRunner(successCallback, failureCallback) {
+            const runner = {
+                withSuccessHandler: function(cb) { successCallback = cb; return runner; },
+                withFailureHandler: function(cb) { failureCallback = cb; return runner; }
+            };
+
+            const actions = [
+                'checkMemberInitial', 'saveData', 'uploadSlip', 'adminLogin', 'getRegistrarStage1', 
+                'getTreasurerList', 'getRegistrarStage2', 'changeStatus', 'resendRejectEmail', 
+                'approveByRegistrar', 'generateIdAndPDF', 'getDashboardData', 'searchMemberAll', 
+                'getPendingCounts', 'getExpiredMembers', 'sendExpiryEmail', 'getActiveMembers', 
+                'getPendingApprovalForExport', 'rejectApplication', 'confirmPayment', 
+                'getRegistrarStage2Data', 'submitAppeal'
+            ];
+
+            actions.forEach(action => {
+                runner[action] = async function(...args) {
+                    try {
+                        // 🌟 2. อัปเดตคำสั่ง fetch (ลบ headers ออกเพื่อหลบ CORS)
+                        const response = await fetch(API_URL, {
+                            method: 'POST',
+                            // ไม่ต้องใส่ headers แล้ว ให้เบราว์เซอร์ส่งเป็น text ธรรมดา
+                            body: JSON.stringify({ action: action, args: args })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            if (successCallback) successCallback(result.data);
+                        } else {
+                            if (failureCallback) failureCallback(new Error(result.error));
+                            else console.error("Backend Error:", result.error);
+                        }
+                    } catch (err) {
+                        if (failureCallback) failureCallback(err);
+                        else console.error("Fetch Error:", err);
+                    }
+                };
+            });
+            return runner;
+        }
+
+        function createRunner(successCallback, failureCallback) {
+            const runner = {
+                withSuccessHandler: function(cb) { successCallback = cb; return runner; },
+                withFailureHandler: function(cb) { failureCallback = cb; return runner; }
+            };
+
+            // รายชื่อฟังก์ชันใน Code.gs
+            const actions = [
+                'checkMemberInitial', 'saveData', 'uploadSlip', 'adminLogin', 'getRegistrarStage1', 
+                'getTreasurerList', 'getRegistrarStage2', 'changeStatus', 'resendRejectEmail', 
+                'approveByRegistrar', 'generateIdAndPDF', 'getDashboardData', 'searchMemberAll', 
+                'getPendingCounts', 'getExpiredMembers', 'sendExpiryEmail', 'getActiveMembers', 
+                'getPendingApprovalForExport', 'rejectApplication', 'confirmPayment', 
+                'getRegistrarStage2Data', 'submitAppeal'
+            ];
+
+            actions.forEach(action => {
+                runner[action] = async function(...args) {
+                    try {
+                        // อยู่ในฟังก์ชัน runner[action] = async function(...args) { ... }
+                        const response = await fetch(API_URL, {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'text/plain;charset=utf-8' 
+                            },
+                            redirect: "follow", // 🌟 เพิ่มบรรทัดนี้เข้าไป เพื่อบังคับให้เบราว์เซอร์ตาม Google ไปรับข้อมูล
+                            body: JSON.stringify({ action: action, args: args })
+                        });
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            if (successCallback) successCallback(result.data);
+                        } else {
+                            if (failureCallback) failureCallback(new Error(result.error));
+                            else console.error("Backend Error:", result.error);
+                        }
+                    } catch (err) {
+                        if (failureCallback) failureCallback(err);
+                        else console.error("Fetch Error:", err);
+                    }
+                };
+            });
+            return runner;
+        }
+
+        // =========================================================================
+        // 🌟 ส่วนที่ 2: โค้ด JavaScript จัดการหน้าเว็บทั้งหมด
+        // =========================================================================
+        
+        let formData = { membershipType: '', category: '', idNumber: '', status: '', mobileToCalc: '', existingData: null };
+        let currentAdminRole = ''; // ตัวแปรเก็บสิทธิ์การใช้งาน
+
+        $(document).ready(function () {
+            $.Thailand({ $district: $('#subdistrict'), $amphoe: $('#district'), $province: $('#province'), $zipcode: $('#zipcode') });
+            $.Thailand({ $district: $('#subdistrictCorp'), $amphoe: $('#districtCorp'), $province: $('#provinceCorp'), $zipcode: $('#zipcodeCorp') });
+        });
+
+        function goTo(stepNum) {
+            document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
+            let targetId = typeof stepNum === 'number' ? 'step' + stepNum : stepNum;
+            document.getElementById(targetId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetSystem() {
+            formData = { membershipType: '', category: '', idNumber: '', status: '', mobileToCalc: '', existingData: null };
+            
+            document.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], input[type="file"], input[type="tel"]').forEach(el => {
+                el.value = '';
+                el.classList.remove('border-red-500', 'bg-red-50', 'border-green-500', 'border-orange-500', 'bg-orange-50'); 
+            });
+            document.querySelectorAll('select').forEach(el => el.value = '');
+            document.querySelectorAll('p[id$="-error"]').forEach(el => el.classList.add('hidden')); 
+            
+            const checkIdEl = document.getElementById('checkId');
+            if(checkIdEl) { checkIdEl.value = ''; checkIdEl.disabled = false; }
+            const btnCheckEl = document.getElementById('btnCheck');
+            if(btnCheckEl) btnCheckEl.disabled = false;
+
+            document.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
+            const defaultCategory = document.querySelector('input[name="memCategory"][value="สมาชิกสามัญ"]');
+            if (defaultCategory) defaultCategory.checked = true;
+
+            document.getElementById('facebook').value = '-';
+            document.getElementById('website').value = '-';
+            document.getElementById('facebookCorp').value = '-';
+            document.getElementById('websiteCorp').value = '-';
+            document.getElementById('brandName').value = '-';
+
+            let pdpaBox = document.getElementById('pdpaConsent');
+            if(pdpaBox) pdpaBox.checked = false;
+
+            document.getElementById('checkMsg').innerHTML = '';
+            document.getElementById('typeSelection').classList.add('hidden');
+            goTo(1);
+        }
+
+        function isValidThaiID(id) {
+            if (!/^[0-9]{13}$/.test(id)) return false;
+            let sum = 0;
+            for (let i = 0; i < 12; i++) sum += parseInt(id.charAt(i)) * (13 - i);
+            let checkDigit = (11 - (sum % 11)) % 10;
+            return checkDigit === parseInt(id.charAt(12));
+        }
+
+        function validateCoordinatorID(inputEl) {
+            let id = inputEl.value;
+            let errorEl = document.getElementById(inputEl.id + '-error');
+            
+            if (id.length === 0) {
+                errorEl.classList.add('hidden');
+                inputEl.classList.remove('border-red-500', 'bg-red-50', 'border-green-500');
+                return;
+            }
+            if (!isValidThaiID(id)) {
+                errorEl.classList.remove('hidden');
+                inputEl.classList.add('border-red-500', 'bg-red-50');
+                inputEl.classList.remove('border-green-500');
+            } else {
+                errorEl.classList.add('hidden');
+                inputEl.classList.remove('border-red-500', 'bg-red-50');
+                inputEl.classList.add('border-green-500');
+            }
+        }
+
+        function validatePhoneUI(inputEl) {
+            let phone = inputEl.value;
+            let errorEl = document.getElementById(inputEl.id + '-error');
+            
+            if (phone.length === 0) {
+                errorEl.classList.add('hidden');
+                inputEl.classList.remove('border-red-500', 'bg-red-50', 'border-green-500');
+                return;
+            }
+            if (phone.length !== 10 || !phone.startsWith('0')) {
+                errorEl.classList.remove('hidden');
+                inputEl.classList.add('border-red-500', 'bg-red-50');
+                inputEl.classList.remove('border-green-500');
+            } else {
+                errorEl.classList.add('hidden');
+                inputEl.classList.remove('border-red-500', 'bg-red-50');
+                inputEl.classList.add('border-green-500');
+            }
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validateEmailUI(inputEl) {
+            let email = inputEl.value.trim();
+            let errorEl = document.getElementById(inputEl.id + '-error');
+            
+            if (email.length === 0) {
+                if(errorEl) errorEl.classList.add('hidden');
+                inputEl.classList.remove('border-red-500', 'bg-red-50', 'border-green-500');
+                return;
+            }
+            if (!isValidEmail(email)) {
+                if(errorEl) errorEl.classList.remove('hidden');
+                inputEl.classList.add('border-red-500', 'bg-red-50');
+                inputEl.classList.remove('border-green-500');
+            } else {
+                if(errorEl) errorEl.classList.add('hidden');
+                inputEl.classList.remove('border-red-500', 'bg-red-50');
+                inputEl.classList.add('border-green-500');
+            }
+        }
+
+        function validateSocialUI(inputEl, type) {
+            let val = inputEl.value.trim();
+            let errorEl = document.getElementById(inputEl.id + '-error');
+            
+            if (val.length === 0 || val === '-') {
+                if(errorEl) errorEl.classList.add('hidden');
+                inputEl.classList.remove('border-orange-500', 'bg-orange-50', 'border-green-500');
+                return;
+            }
+
+            let isError = false;
+            if (type === 'line') {
+                if (/[ก-๙]/.test(val)) isError = true;
+            } else if (type === 'web') {
+                if (!val.includes('.') && !val.includes('http')) isError = true;
+            }
+
+            if (isError) {
+                if(errorEl) errorEl.classList.remove('hidden');
+                inputEl.classList.add('border-orange-500', 'bg-orange-50'); 
+                inputEl.classList.remove('border-green-500');
+            } else {
+                if(errorEl) errorEl.classList.add('hidden');
+                inputEl.classList.remove('border-orange-500', 'bg-orange-50');
+                inputEl.classList.add('border-green-500');
+            }
+        }
+
+        function handleCheck() {
+            const idInput = document.getElementById('checkId');
+            const id = idInput.value.trim();
+            const msg = document.getElementById('checkMsg');
+            
+            if (!/^[0-9]{13}$/.test(id)) return Swal.fire('ผิดพลาด', 'กรุณากรอกเฉพาะตัวเลขให้ครบ 13 หลัก', 'error');
+
+            let sum = 0;
+            for (let i = 0; i < 12; i++) sum += parseInt(id.charAt(i)) * (13 - i);
+            let checkDigit = (11 - (sum % 11)) % 10;
+            if (checkDigit !== parseInt(id.charAt(12))) {
+                return Swal.fire({ icon: 'error', title: 'เลข 13 หลักไม่ถูกต้อง', text: 'กรุณาตรวจสอบตัวเลขอีกครั้งว่าพิมพ์ถูกทุกตำแหน่งหรือไม่' });
+            }
+
+            idInput.disabled = true; document.getElementById('btnCheck').disabled = true;
+            msg.innerHTML = '<p class="text-blue-600 animate-pulse"><i class="fas fa-spinner fa-spin mr-2"></i> ค้นหาข้อมูลในระบบ...</p>';
+            
+            google.script.run.withSuccessHandler(res => {
+                idInput.disabled = false; document.getElementById('btnCheck').disabled = false;
+                if (!res) return msg.innerHTML = '';
+                if (res.error) return Swal.fire('Error', res.error, 'error');
+
+                if(res.found) {
+                    let status = String(res.data['สถานะ'] || '').trim();
+                    let fullName = (res.data['ชื่อ'] || res.data['ชื่อกิจการ'] || '') + ' ' + (res.data['นามสกุล'] || '');
+                    
+                    formData.membershipType = res.type;
+                    formData.idNumber = id;
+                    formData.mobileToCalc = res.data['เบอร์มือถือ'] || res.data['เบอร์โทรมือถือ (กิจการ)'];
+                    formData.existingData = res.data;
+
+                    let showDocs = false; 
+
+                    if(status.includes("รอชำระเงิน")) {
+                        msg.innerHTML = `<div class="bg-yellow-50 p-5 border border-yellow-200 rounded-xl shadow-sm">
+                            <p class="font-bold text-yellow-800 text-lg mb-1"><i class="fas fa-check-circle mr-1"></i> คณะกรรมการอนุมัติแล้ว!</p>
+                            <p class="text-gray-700">คุณ/กิจการ: ${fullName}</p>
+                            <button type="button" onclick="goToPayment('${status}')" class="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition"><i class="fas fa-wallet mr-2"></i> ดำเนินการชำระเงิน</button>
+                        </div>`;
+                    } else if (status.includes("ไม่ถูกต้อง")) {
+                        msg.innerHTML = `<div class="bg-orange-50 p-5 border border-orange-300 rounded-xl shadow-sm">
+                            <div class="flex items-center mb-3">
+                                <i class="fas fa-exclamation-triangle text-orange-600 text-3xl mr-3"></i>
+                                <div><h3 class="text-orange-800 font-bold text-lg leading-tight">พบปัญหาการชำระเงิน!</h3></div>
+                            </div>
+                            <p class="text-gray-700 mb-1">สถานะ: <b>${status}</b></p>
+                            <p class="text-gray-600 text-sm mb-4">ระบบตรวจสอบพบว่ายอดเงินหรือสลิปโอนเงินไม่ถูกต้อง กรุณากดปุ่มด้านล่างเพื่อตรวจสอบยอดและแจ้งโอนเงินใหม่อีกครั้ง</p>
+                            <button type="button" onclick="goToPayment('${status}')" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition"><i class="fas fa-file-upload mr-2"></i> แจ้งโอนเงิน / แนบสลิปใหม่</button>
+                        </div>`;
+                    } else if (status.includes("รอคณะกรรมการอนุมัติ")) {
+                        msg.innerHTML = `<div class="bg-blue-50 p-5 border border-blue-200 rounded-xl shadow-sm"><p class="font-bold text-blue-800"><i class="fas fa-clock mr-2"></i> อยู่ระหว่างรอคณะกรรมการพิจารณาอนุมัติ</p></div>`;
+                    } else if (status.includes("Active") || status.includes("ชำระค่าสมาชิกแล้ว")) {
+                        showDocs = true; 
+                        let memId = res.data['เลขทะเบียนสมาชิก'] || res.data['เลขสมาชิก'] || '-';
+                        msg.innerHTML = `<div class="bg-emerald-50 p-5 border border-emerald-200 rounded-xl shadow-sm">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-shield-check text-emerald-500 text-3xl mr-3"></i>
+                                <div><h3 class="text-emerald-800 font-bold text-lg leading-tight">สถานะ: ปกติ (Active)</h3></div>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border border-emerald-100 space-y-2 text-sm mb-4">
+                                <p class="flex justify-between border-b pb-2"><span class="text-gray-500">เลขสมาชิก:</span> <span class="font-bold font-mono text-blue-700">${memId}</span></p>
+                                <p class="flex justify-between border-b pb-2 items-start"><span class="text-gray-500 mr-4 whitespace-nowrap">ชื่อ/กิจการ:</span> <span class="font-bold text-right">${fullName}</span></p>
+                                <p class="flex justify-between"><span class="text-gray-500">วันหมดอายุ:</span> <span class="font-bold text-red-600">${res.data['วันหมดอายุสมาชิก'] || '-'}</span></p>
+                            </div>
+                            <button type="button" onclick="verifyPhoneToUpdate()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition"><i class="fas fa-edit mr-2"></i> แจ้งอัปเดตข้อมูล / แก้ไขข้อมูล</button>
+                        </div>`;
+                    } else if (status.includes("หมดอายุ") || status.includes("สิ้นสภาพ")) {
+                        showDocs = true; 
+                        msg.innerHTML = `<div class="bg-red-50 p-5 border border-red-200 rounded-xl shadow-sm">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-exclamation-triangle text-red-500 text-3xl mr-3"></i>
+                                <div><h3 class="text-red-800 font-bold text-lg leading-tight">สถานะ: ${status}</h3></div>
+                            </div>
+                            <p class="text-gray-700 mb-4">คุณ/กิจการ: <b>${fullName}</b></p>
+                            <button type="button" onclick="startRenewal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition"><i class="fas fa-sync-alt mr-2"></i> ดำเนินการต่ออายุสมาชิก</button>
+                        </div>`;
+                    } else if (status.includes("ไม่อุทธรณ์") || status.includes("บอร์ดไม่อนุมัติ และไม่อุทธรณ์")) {
+                        msg.innerHTML = `<div class="bg-gray-100 p-5 border rounded-xl shadow-sm"><p class="text-gray-700">${fullName}</p><p class="font-bold mt-1 text-red-700">สถานะปัจจุบัน: บอร์ดไม่อนุมัติ และไม่อุทธรณ์การพิจารณา (สิ้นสุด)</p></div>`;
+                    } else if (status.includes("รอพิจารณาอุทธรณ์")) {
+                        msg.innerHTML = `<div class="bg-blue-50 p-5 border border-blue-200 rounded-xl shadow-sm"><p class="font-bold text-blue-800"><i class="fas fa-clock mr-2"></i> อยู่ระหว่างรอคณะกรรมการพิจารณาอุทธรณ์ (รอบที่ 2)</p></div>`;
+                    } else if (status.includes("ไม่อนุมัติ")) {
+                        let rejDateStr = res.data['วันที่ไม่อนุมัติ'];
+                        let daysLeft = 15;
+                        let isExpired = false;
+
+                        if (rejDateStr && typeof rejDateStr === 'string' && rejDateStr.includes('/')) {
+                            let parts = rejDateStr.split('/');
+                            if (parts.length === 3) {
+                                let rejDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
+                                let today = new Date();
+                                let diffTime = today.getTime() - rejDate.getTime();
+                                let diffDays = Math.floor(diffTime / (1000 * 3600 * 24));
+                                daysLeft = 15 - diffDays;
+                                if (daysLeft < 0) isExpired = true;
+                            }
+                        }
+
+                        if (isExpired) {
+                            google.script.run.submitAppeal(id, res.type, false, 'เกินกำหนด 15 วัน');
+                            msg.innerHTML = `<div class="bg-gray-100 p-5 border rounded-xl shadow-sm">
+                                <p class="text-gray-700">${fullName}</p>
+                                <p class="font-bold mt-1 text-red-700">สถานะปัจจุบัน: บอร์ดไม่อนุมัติ และไม่อุทธรณ์การพิจารณา (เกินกำหนด 15 วัน)</p>
+                            </div>`;
+                        } else {
+                            msg.innerHTML = `<div class="bg-red-50 p-5 border border-red-200 rounded-xl shadow-sm">
+                                <div class="flex items-center mb-3">
+                                    <i class="fas fa-times-circle text-red-600 text-3xl mr-3"></i>
+                                    <div><h3 class="text-red-800 font-bold text-lg leading-tight">คณะกรรมการไม่อนุมัติการสมัคร</h3></div>
+                                </div>
+                                <p class="text-gray-700 mb-2">คุณ/กิจการ: <b>${fullName}</b></p>
+                                <p class="text-red-600 text-sm mb-4">ท่านสามารถยื่น <b>"อุทธรณ์การพิจารณา"</b> ได้ภายใน 15 วัน <br>(เหลือเวลาอีก <b>${daysLeft}</b> วัน)</p>
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <button type="button" onclick="handleAppealAction(true)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition"><i class="fas fa-gavel mr-2"></i> ยื่นอุทธรณ์การพิจารณา</button>
+                                    <button type="button" onclick="handleAppealAction(false)" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition"><i class="fas fa-times mr-2"></i> ไม่อุทธรณ์การพิจารณา</button>
+                                </div>
+                            </div>`;
+                        }
+                    } else {
+                        msg.innerHTML = `<div class="bg-gray-100 p-5 border rounded-xl shadow-sm"><p class="text-gray-700">${fullName}</p><p class="font-bold mt-1 text-gray-900">สถานะปัจจุบัน: ${status}</p></div>`;
+                    }
+
+                    if (showDocs) {
+                        let pdfUrl = res.data['ใบสมัคร PDF'];
+                        let receiptUrl = res.data['ใบเสร็จ PDF'];
+
+                        if (pdfUrl || receiptUrl) {
+                            let docHtml = `
+                            <div class="mt-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm animate-fadeIn">
+                                <h4 class="font-bold text-gray-800 mb-3 border-b pb-2"><i class="fas fa-lock text-yellow-500 mr-2"></i> เอกสารอ้างอิงของท่าน (ข้อมูลส่วนบุคคล)</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse text-sm">
+                                        <thead>
+                                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                                <th class="p-2 font-medium">ชื่อเอกสาร</th>
+                                                <th class="p-2 font-medium text-center whitespace-nowrap">จัดการ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+                            
+                            if (pdfUrl) {
+                                docHtml += `
+                                            <tr class="border-b hover:bg-gray-50 transition">
+                                                <td class="p-2 text-gray-700"><i class="fas fa-file-pdf text-red-500 mr-2"></i> ใบสมัครสมาชิก</td>
+                                                <td class="p-2 text-center whitespace-nowrap">
+                                                    <button type="button" onclick="verifyPhoneToDownload('${pdfUrl}')" class="inline-block bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-sm transition"><i class="fas fa-key mr-1"></i> ข้อมูลใบสมัครสมาชิก</button>
+                                                </td>
+                                            </tr>`;
+                            }
+                            if (receiptUrl) {
+                                docHtml += `
+                                            <tr class="hover:bg-gray-50 transition">
+                                                <td class="p-2 text-gray-700"><i class="fas fa-file-invoice-dollar text-emerald-500 mr-2"></i> ใบเสร็จรับเงิน</td>
+                                                <td class="p-2 text-center whitespace-nowrap">
+                                                    <button type="button" onclick="verifyPhoneToDownload('${receiptUrl}')" class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-sm transition"><i class="fas fa-key mr-1"></i> ใบเสร็จรับเงิน</button>
+                                                </td>
+                                            </tr>`;
+                            }
+                            
+                            docHtml += `    </tbody>
+                                    </table>
+                                </div>
+                            </div>`;
+                            
+                            msg.innerHTML += docHtml;
+                        }
+                    }
+
+                } else {
+                    formData.isNewMember = true; formData.idNumber = id;
+                    msg.innerHTML = '<p class="text-green-600 font-bold mt-3"><i class="fas fa-user-plus mr-1"></i> ไม่พบข้อมูลในระบบ (เริ่มทำรายการสมัครใหม่)</p>';
+                    document.getElementById('typeSelection').classList.remove('hidden');
+
+                    const corpRadio = document.querySelector('input[name="memType"][value="นิติบุคคล"]');
+                    const personalRadio = document.querySelector('input[name="memType"][value="บุคคล"]');
+                    const corpLabel = corpRadio ? corpRadio.closest('label') : null;
+                    const personalLabel = personalRadio ? personalRadio.closest('label') : null;
+                    const typeContainer = corpRadio ? corpRadio.closest('.mb-8') : null;
+
+                    const oldMsg = document.getElementById('typeLockMsg');
+                    if (oldMsg) oldMsg.remove();
+
+                    if (id.startsWith('0')) {
+                        if(corpRadio) { corpRadio.checked = true; corpRadio.disabled = false; }
+                        if(personalRadio) { personalRadio.disabled = true; }
+                        if(corpLabel) { corpLabel.classList.remove('opacity-50', 'bg-gray-100', 'cursor-not-allowed'); }
+                        if(personalLabel) { personalLabel.classList.add('opacity-50', 'bg-gray-100', 'cursor-not-allowed'); }
+                        if(typeContainer) { typeContainer.insertAdjacentHTML('beforeend', '<p id="typeLockMsg" class="text-sm text-red-600 mt-3 text-center bg-red-50 py-2 rounded-lg border border-red-200 shadow-sm animate-pulse"><i class="fas fa-lock mr-1"></i> ระบบล็อกเป็น <b>"นิติบุคคล"</b> อัตโนมัติ (เนื่องจากเลข 13 หลักขึ้นต้นด้วย 0)</p>'); }
+                    } else {
+                        if(personalRadio) { personalRadio.checked = true; personalRadio.disabled = false; }
+                        if(corpRadio) { corpRadio.disabled = true; }
+                        if(personalLabel) { personalLabel.classList.remove('opacity-50', 'bg-gray-100', 'cursor-not-allowed'); }
+                        if(corpLabel) { corpLabel.classList.add('opacity-50', 'bg-gray-100', 'cursor-not-allowed'); }
+                    }
+                }
+            }).checkMemberInitial(id);
+        }
+
+        function verifyPhoneToUpdate() {
+            let actualPhone = String(formData.mobileToCalc).replace(/\D/g, '');
+            if(!actualPhone) return Swal.fire('ข้อผิดพลาด', 'ไม่พบเบอร์โทรศัพท์ในระบบ กรุณาติดต่อเจ้าหน้าที่', 'error');
+
+            Swal.fire({
+                title: 'ยืนยันตัวตน', text: 'กรุณากรอกเบอร์โทรศัพท์มือถือที่ลงทะเบียนไว้', input: 'text',
+                inputAttributes: { maxlength: 10, placeholder: '081xxxxxxx' }, showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    let inputPhone = String(res.value).replace(/\D/g, '');
+                    if (inputPhone === actualPhone) {
+                        formData.category = 'อัปเดตข้อมูล'; prefillForm(formData.existingData, formData.membershipType); goTo(4);
+                    } else { Swal.fire('ข้อมูลไม่ตรงกัน', 'เบอร์โทรศัพท์ไม่ถูกต้อง', 'error'); }
+                }
+            });
+        }
+
+        function confirmSelection() {
+            const catSelected = document.querySelector('input[name="memCategory"]:checked');
+            const typeSelected = document.querySelector('input[name="memType"]:checked');
+            if (!catSelected || !typeSelected) return Swal.fire('แจ้งเตือน', 'กรุณาเลือก "ประเภทสมาชิก" และ "รูปแบบการสมัคร" ให้ครบถ้วน', 'warning');
+            
+            formData.category = catSelected.value; formData.membershipType = typeSelected.value;
+
+            if(formData.membershipType === 'นิติบุคคล') {
+                document.getElementById('form-personal').classList.add('hidden'); document.getElementById('form-corporate').classList.remove('hidden');
+            } else {
+                document.getElementById('form-personal').classList.remove('hidden'); document.getElementById('form-corporate').classList.add('hidden');
+            }
+            goTo(4); 
+        }
+
+        function startRenewal() {
+            formData.category = 'ต่ออายุสมาชิก'; prefillForm(formData.existingData, formData.membershipType); goTo(4); 
+        }
+
+        function prefillForm(data, type) {
+            if (!data) return;
+            const setVal = (id, val, defaultVal = '') => { const el = document.getElementById(id); if (el) el.value = val || defaultVal; };
+            const formatDateForInput = (dateStr) => {
+                if (!dateStr) return '';
+                if (dateStr.includes('/')) { let p = dateStr.split('/'); if (p.length === 3) return `${p[2]}-${p[1]}-${p[0]}`; }
+                return dateStr;
+            };
+
+            if (type === 'นิติบุคคล') {
+                setVal('corpType', data['รูปแบบกิจการ']); setVal('corpName', data['ชื่อกิจการ']); setVal('businessType', data['ประเภทธุรกิจ']);
+                setVal('brandName', data['ชื่อยี่ห้อ-ผลิตภัณฑ์'], '-'); setVal('addressCorp', data['ที่อยู่กิจการ']); setVal('mooCorp', data['หมู่ที่']);
+                setVal('subdistrictCorp', data['ตำบล']); setVal('districtCorp', data['อำเภอ']); setVal('provinceCorp', data['จังหวัด']);
+                setVal('zipcodeCorp', data['รหัสไปรษณีย์']); setVal('mobileCorp', String(data['เบอร์โทรมือถือ (กิจการ)'] || '').replace(/\D/g, ''));
+                setVal('emailCorp', data['E-Mail (กิจการ)']); setVal('lineCorp', data['Line ID (กิจการ)']); 
+                setVal('facebookCorp', data['Facebook (กิจการ)'], '-'); setVal('websiteCorp', data['Website (กิจการ)'], '-');
+                
+                setVal('title1', data['คำนำหน้าผู้ติดต่อ1']); setVal('fname1', data['ชื่อผู้ติดต่อ1']); setVal('lname1', data['นามสกุลผู้ติดต่อ1']);
+                setVal('idCard1', data['เลขบัตรประชาชนผู้ติดต่อ1']);
+                setVal('pos1', data['ตำแหน่งผู้ติดต่อ1']); setVal('phone1', String(data['เบอร์โทรผู้ติดต่อ1'] || '').replace(/\D/g, ''));
+                setVal('line1', data['LineIDผู้ติดต่อ1']); setVal('email1', data['E-Mailผู้ติดต่อ1']);
+                
+                document.getElementById('form-personal').classList.add('hidden'); document.getElementById('form-corporate').classList.remove('hidden');
+            } else {
+                setVal('title', data['คำนำหน้า']); setVal('firstName', data['ชื่อ']); setVal('lastName', data['นามสกุล']);
+                setVal('nationality', data['สัญชาติ'] || 'ไทย'); setVal('idExpiryDate', formatDateForInput(data['วันหมดอายุบัตร']));
+                setVal('address', data['ที่อยู่']); setVal('moo', data['หมู่ที่']); setVal('subdistrict', data['ตำบล']);
+                setVal('district', data['อำเภอ']); setVal('province', data['จังหวัด']); setVal('zipcode', data['รหัสไปรษณีย์']);
+                setVal('mobile', String(data['เบอร์มือถือ'] || '').replace(/\D/g, '')); setVal('email', data['E-Mail']);
+                setVal('lineId', data['Line ID']); setVal('facebook', data['Facebook'], '-'); setVal('website', data['Website'], '-');
+                
+                document.getElementById('form-personal').classList.remove('hidden'); document.getElementById('form-corporate').classList.add('hidden');
+            }
+        }
+
+        function handlePreview() {
+            const pdpaBox = document.getElementById('pdpaConsent');
+            if (pdpaBox && !pdpaBox.checked) {
+                return Swal.fire('แจ้งเตือน', 'กรุณากดยอมรับ นโยบายการคุ้มครองข้อมูลส่วนบุคคล (PDPA) ก่อนกดดำเนินการต่อ', 'warning');
+            }
+
+            const getVal = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+            let inputs = {};
+            
+            if (formData.membershipType === 'นิติบุคคล') {
+                inputs = {
+                    corpType: getVal('corpType'), corpName: getVal('corpName'), businessType: getVal('businessType'), brandName: getVal('brandName'),
+                    addressCorp: getVal('addressCorp'), mooCorp: getVal('mooCorp'), subdistrictCorp: getVal('subdistrictCorp'), districtCorp: getVal('districtCorp'),
+                    provinceCorp: getVal('provinceCorp'), zipcodeCorp: getVal('zipcodeCorp'), mobileCorp: getVal('mobileCorp'), emailCorp: getVal('emailCorp'),
+                    lineCorp: getVal('lineCorp'), facebookCorp: getVal('facebookCorp'), websiteCorp: getVal('websiteCorp'), 
+                    title1: getVal('title1'), fname1: getVal('fname1'), lname1: getVal('lname1'), idCard1: getVal('idCard1'), pos1: getVal('pos1'), phone1: getVal('phone1'), line1: getVal('line1'), email1: getVal('email1')
+                };
+                
+                if(!inputs.corpType || !inputs.corpName || !inputs.businessType || !inputs.addressCorp || !inputs.subdistrictCorp || !inputs.districtCorp || !inputs.provinceCorp || !inputs.zipcodeCorp || !inputs.mobileCorp || !inputs.emailCorp || !inputs.fname1 || !inputs.lname1 || !inputs.idCard1 || !inputs.pos1 || !inputs.phone1 || !inputs.email1) {
+                    return Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูลนิติบุคคลและผู้ติดต่อที่มีเครื่องหมาย * ให้ครบถ้วน', 'warning');
+                }
+                
+                if (!isValidThaiID(inputs.idCard1)) {
+                    document.getElementById('idCard1').focus();
+                    return Swal.fire('ข้อมูลไม่ถูกต้อง', 'เลขบัตรประชาชนผู้ติดต่อประสานงานไม่ถูกต้อง', 'warning');
+                }
+                if (!isValidEmail(inputs.emailCorp)) {
+                    document.getElementById('emailCorp').focus();
+                    return Swal.fire('ข้อมูลไม่ถูกต้อง', 'รูปแบบ E-Mail (กิจการ) ไม่ถูกต้อง', 'warning');
+                }
+                if (!isValidEmail(inputs.email1)) {
+                    document.getElementById('email1').focus();
+                    return Swal.fire('ข้อมูลไม่ถูกต้อง', 'รูปแบบ E-Mail (ผู้ติดต่อประสานงาน) ไม่ถูกต้อง', 'warning');
+                }
+                if (inputs.mobileCorp.length !== 10 || !inputs.mobileCorp.startsWith('0')) {
+                    document.getElementById('mobileCorp').focus();
+                    return Swal.fire('ข้อมูลไม่ถูกต้อง', 'เบอร์โทรมือถือ (กิจการ) ต้องมี 10 หลัก และขึ้นต้นด้วย 0', 'warning');
+                }
+                if (inputs.phone1.length !== 10 || !inputs.phone1.startsWith('0')) {
+                    document.getElementById('phone1').focus();
+                    return Swal.fire('ข้อมูลไม่ถูกต้อง', 'เบอร์โทรผู้ติดต่อประสานงาน ต้องมี 10 หลัก และขึ้นต้นด้วย 0', 'warning');
+                }
+
+            } else {
+                inputs = {
+                    title: getVal('title'), firstName: getVal('firstName'), lastName: getVal('lastName'), nationality: getVal('nationality'),
+                    idExpiryDate: getVal('idExpiryDate'), address: getVal('address'), moo: getVal('moo'), subdistrict: getVal('subdistrict'),
+                    district: getVal('district'), province: getVal('province'), zipcode: getVal('zipcode'), mobile: getVal('mobile'),
+                    email: getVal('email'), lineId: getVal('lineId'), facebook: getVal('facebook'), website: getVal('website')
+                };
+
+                if(!inputs.title || !inputs.firstName || !inputs.address || !inputs.subdistrict || !inputs.district || !inputs.province || !inputs.zipcode || !inputs.mobile || !inputs.email) {
+                    return Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูลส่วนตัวที่มีเครื่องหมาย * ให้ครบถ้วน', 'warning');
+                }
+
+                if (!isValidEmail(inputs.email)) {
+                    document.getElementById('email').focus();
+                    return Swal.fire('ข้อมูลไม่ถูกต้อง', 'รูปแบบ E-Mail ไม่ถูกต้อง', 'warning');
+                }
+                if (inputs.mobile.length !== 10 || !inputs.mobile.startsWith('0')) {
+                    document.getElementById('mobile').focus();
+                    return Swal.fire('ข้อมูลไม่ถูกต้อง', 'เบอร์มือถือ ต้องมี 10 หลัก และขึ้นต้นด้วย 0', 'warning');
+                }
+            }
+            
+            Object.assign(formData, inputs);
+            
+            let displayExpiry = inputs.idExpiryDate || '-';
+            if (displayExpiry !== '-' && displayExpiry.includes('-')) {
+                let p = displayExpiry.split('-');
+                displayExpiry = `${p[2]}/${p[1]}/${p[0]}`;
+            }
+
+            let pHTML = `<div class="bg-white p-6 rounded-xl border shadow-sm text-sm"><table class="w-full text-left border-collapse">`;
+            let dataToPreview = formData.membershipType === 'นิติบุคคล' ? [
+                { label: 'ประเภทการสมัคร', val: `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">${formData.category} (นิติบุคคล)</span>` },
+                { label: 'เลขทะเบียนนิติบุคคล', val: formData.idNumber },
+                { label: 'รูปแบบและชื่อกิจการ', val: `${inputs.corpType} ${inputs.corpName}` }, 
+                { label: 'ประเภทธุรกิจ', val: inputs.businessType },
+                { label: 'ที่อยู่ตั้งกิจการ', val: `${inputs.addressCorp} ม.${inputs.mooCorp || '-'} ต.${inputs.subdistrictCorp} อ.${inputs.districtCorp} จ.${inputs.provinceCorp} ${inputs.zipcodeCorp}` },
+                { label: 'เบอร์โทรกิจการ', val: inputs.mobileCorp },
+                { label: 'อีเมลกิจการ', val: inputs.emailCorp },
+                { label: 'ผู้ติดต่อประสานงาน', val: `<b>${inputs.title1}${inputs.fname1} ${inputs.lname1}</b><br>เลขบัตรฯ: ${inputs.idCard1}<br>ตำแหน่ง: ${inputs.pos1}<br>โทร: ${inputs.phone1}<br>อีเมล: ${inputs.email1}` }
+            ] : [
+                { label: 'ประเภทการสมัคร', val: `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">${formData.category} (บุคคลธรรมดา)</span>` },
+                { label: 'เลขประจำตัวประชาชน', val: formData.idNumber },
+                { label: 'ชื่อ-นามสกุล', val: `${inputs.title}${inputs.firstName} ${inputs.lastName}` }, 
+                { label: 'วันหมดอายุบัตร', val: displayExpiry },
+                { label: 'ที่อยู่', val: `${inputs.address} ม.${inputs.moo || '-'} ต.${inputs.subdistrict} อ.${inputs.district} จ.${inputs.province} ${inputs.zipcode}` },
+                { label: 'เบอร์มือถือ', val: inputs.mobile },
+                { label: 'อีเมล', val: inputs.email }
+            ];
+
+            dataToPreview.forEach(item => { pHTML += `<tr class="border-b"><td class="py-3 text-gray-500 font-medium w-1/3 align-top">${item.label}</td><td class="py-3 font-bold text-blue-900 align-top">${item.val || '-'}</td></tr>`; });
+            pHTML += `</table></div>`;
+            document.getElementById('preview-data-area').innerHTML = pHTML;
+            goTo('step-preview');
+        }
+
+        function confirmAndSave() {
+            const pdpaBox = document.getElementById('pdpaConsent');
+            if (pdpaBox && !pdpaBox.checked) {
+                return Swal.fire('แจ้งเตือน', 'กรุณากดยอมรับเงื่อนไขการคุ้มครองข้อมูลส่วนบุคคล (PDPA) ก่อนกดยืนยัน', 'warning');
+            }
+
+            document.getElementById('btnConfirmSave').disabled = true;
+            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            google.script.run
+                .withSuccessHandler(res => {
+                    if(res.success) { Swal.fire('สำเร็จ', 'ส่งเรื่องเรียบร้อยแล้ว', 'success').then(resetSystem); }
+                    else { document.getElementById('btnConfirmSave').disabled = false; Swal.fire('ระบบบันทึกขัดข้อง', res.message, 'error'); }
+                })
+                .withFailureHandler(err => { document.getElementById('btnConfirmSave').disabled = false; Swal.fire('เกิดข้อผิดพลาดในการเชื่อมต่อ', err.message, 'error'); })
+                .saveData(formData);
+        }
+
+        function goToPayment(statusString) {
+            let isNew = statusString.includes('ใหม่');
+            let cleanMobile = String(formData.mobileToCalc).replace(/\D/g, '');
+            let satang = parseInt(cleanMobile.slice(-2)) / 100 || 0;
+            
+            if (formData.category === 'สมาชิกวิสามัญ') {
+                formData.totalFee = 500 + satang; 
+            } else {
+                formData.totalFee = (isNew ? 2000 : 500) + satang; 
+            }
+
+            document.getElementById('displayFee').innerText = formData.totalFee.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('slip').style.display = 'block'; 
+            goTo(5);
+        }
+
+        function handlePayment() {
+            const file = document.getElementById('slip').files[0];
+            
+            if (!file) return Swal.fire('เตือน', 'กรุณาแนบสลิปเพื่อยืนยันการโอนเงิน', 'warning');
+            if (!formData.idNumber || formData.idNumber === '') return Swal.fire('เกิดข้อผิดพลาด', 'ไม่พบรหัสประจำตัว กรุณาทำรายการใหม่', 'error');
+
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) return Swal.fire('ไฟล์รูปภาพใหญ่เกินไป', 'กรุณาลดขนาดรูปภาพสลิป หรือครอปรูปให้มีขนาดไม่เกิน 5MB', 'warning');
+
+            Swal.fire({ title: 'กำลังดำเนินการ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            const reader = new FileReader();
+            reader.onerror = function() { Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอ่านไฟล์รูปภาพนี้ได้ กรุณาลองใช้รูปอื่น', 'error'); };
+            reader.onload = function(e) {
+                const base64 = e.target.result.split(',')[1];
+                google.script.run
+                    .withSuccessHandler(res => {
+                        if (res && res.success) Swal.fire('สำเร็จ', 'แจ้งโอนเงินเรียบร้อย รอเหรัญญิกตรวจสอบ', 'success').then(resetSystem);
+                        else Swal.fire('บันทึกไม่สำเร็จ', res.error || res.message, 'error');
+                    })
+                    .withFailureHandler(err => Swal.fire('การเชื่อมต่อขัดข้อง', err.message, 'error'))
+                    .uploadSlip(base64, file.type, file.name, formData.idNumber, formData.membershipType, formData.totalFee);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function toggleAdmin() {
+            Swal.fire({ title: 'รหัสเข้าสู่ระบบ', input: 'password' }).then(res => {
+                if(res.value) {
+                    Swal.fire({ title: 'ตรวจสอบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    google.script.run.withSuccessHandler(auth => {
+                        Swal.close();
+                        if(auth.success) { 
+                            currentAdminRole = auth.role; // บันทึกสิทธิ์
+                            document.getElementById('user-view').classList.add('hidden'); 
+                            document.getElementById('admin-view').classList.remove('hidden'); 
+                            
+                            const tabContainer = document.getElementById('admin-tabs-container');
+                            const btnReg1 = document.getElementById('btn-reg1');
+                            const btnReg2 = document.getElementById('btn-reg2');
+                            const btnTre = document.getElementById('btn-tre');
+                            
+                            if (auth.role === 'admin') {
+                                tabContainer.className = "grid grid-cols-4 bg-slate-50 border-b";
+                                btnReg1.classList.remove('hidden'); btnReg2.classList.remove('hidden'); btnTre.classList.remove('hidden');
+                            } else if (auth.role === 'registrar') {
+                                tabContainer.className = "grid grid-cols-3 bg-slate-50 border-b";
+                                btnReg1.classList.remove('hidden'); btnReg2.classList.remove('hidden'); btnTre.classList.add('hidden');
+                            } else if (auth.role === 'treasurer') {
+                                tabContainer.className = "grid grid-cols-2 bg-slate-50 border-b";
+                                btnReg1.classList.add('hidden'); btnReg2.classList.add('hidden'); btnTre.classList.remove('hidden');
+                            }
+                            switchAdmin('dash'); setTimeout(() => { refreshBadges(); }, 500);
+                        } else { Swal.fire('รหัสผ่านผิด', 'คุณกรอกรหัสผ่านไม่ถูกต้อง', 'error'); }
+                    }).adminLogin(res.value);
+                }
+            });
+        }
+
+        function refreshBadges() {
+            setTimeout(() => {
+                google.script.run.withSuccessHandler(counts => {
+                    if (counts && counts.error) return;
+                    updateBadge('badge-reg1', counts.reg1); updateBadge('badge-tre', counts.tre); updateBadge('badge-reg2', counts.reg2);
+                }).getPendingCounts();
+            }, 300);
+        }
+
+        function updateBadge(elementId, count) {
+            const badge = document.getElementById(elementId);
+            if (!badge) return; 
+            let num = parseInt(count) || 0; 
+            if (num > 0) {
+                badge.innerText = num; badge.classList.remove('hidden'); 
+                badge.style.display = 'flex'; badge.style.alignItems = 'center'; badge.style.justifyContent = 'center';
+                badge.classList.add('animate-pulse'); setTimeout(() => badge.classList.remove('animate-pulse'), 3000);
+            } else { badge.classList.add('hidden'); badge.style.display = 'none'; }
+        }
+
+        function switchAdmin(mode) {
+            ['dash', 'reg1', 'tre', 'reg2'].forEach(id => { let el = document.getElementById('btn-' + id); if (el) el.classList.remove('active'); });
+            let activeEl = document.getElementById('btn-' + mode); if (activeEl) activeEl.classList.add('active');
+            const content = document.getElementById('admin-content');
+            content.innerHTML = '<p class="text-center py-6 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> กำลังโหลดข้อมูล...</p>';
+            refreshBadges();
+            
+            if (mode === 'dash') google.script.run.withSuccessHandler(renderDashboard).getDashboardData();
+            else if (mode === 'reg1') google.script.run.withSuccessHandler(list => renderTable(list, 'reg1')).getRegistrarStage1();
+            else if (mode === 'tre') google.script.run.withSuccessHandler(list => renderTable(list, 'tre')).getTreasurerList();
+            else if (mode === 'reg2') google.script.run.withSuccessHandler(data => renderReg2Page(data)).getRegistrarStage2Data();
+        }
+
+        function renderReg2Page(data) {
+            if (data.error) return Swal.fire('ข้อผิดพลาด', data.error, 'error');
+
+            let html = `<div class="mb-10">
+                            <div class="flex justify-between items-end mb-4 px-1">
+                                <h3 class="font-bold text-purple-800"><i class="fas fa-id-card-alt mr-2"></i> รายการรอออกเลขสมาชิกและ Gen PDF</h3>
+                            </div>
+                            <div class="overflow-x-auto border rounded-xl shadow-sm">
+                                <table class="w-full text-left border-collapse">
+                                    <thead><tr class="bg-purple-100 border-b text-purple-900"><th class="p-3">ชื่อ / กิจการ</th><th class="p-3">ข้อมูลสถานะ</th><th class="p-3 text-center">จัดการ</th></tr></thead>
+                                    <tbody class="bg-white">`;
+            
+            if(!data.pending || data.pending.length === 0) {
+                html += `<tr><td colspan="3" class="text-center py-8 text-gray-400 bg-slate-50"><i class="fas fa-inbox text-2xl block mb-2"></i>ไม่มีรายการรอจัดการ</td></tr>`;
+            } else {
+                data.pending.forEach(r => {
+                    html += `<tr class="border-b hover:bg-purple-50 transition">
+                                <td class="p-3"><b>${r.name}</b><br><span class="text-xs px-2 py-0.5 bg-white border rounded text-gray-600">${r.type}</span></td>
+                                <td class="p-3 text-sm text-gray-700"><span class="text-xs text-gray-500 block mb-1">สถานะปัจจุบัน:</span> <span class="font-medium">${r.status}</span></td>
+                                <td class="p-3 text-center align-middle">
+                                    <button type="button" onclick="adminAction('generateIdAndPDF', [${r.rowId}, '${r.sheetName}'], 'ออกเลขและ PDF', true)" class="bg-purple-600 text-white px-4 py-2 rounded text-sm font-bold shadow-md hover:bg-purple-700 transition whitespace-nowrap"><i class="fas fa-cogs mr-2"></i> ออกเลข & Gen PDF</button>
+                                </td>
+                            </tr>`;
+                });
+            }
+            html += `</tbody></table></div></div>`;
+
+            html += `<div>
+                        <div class="flex justify-between items-end mb-4 px-1 border-b pb-2">
+                            <h3 class="font-bold text-emerald-700"><i class="fas fa-users mr-2"></i> ฐานข้อมูลสมาชิกทั้งหมด (Active)</h3>
+                            <span class="text-sm text-gray-500">จำนวน ${data.active ? data.active.length : 0} รายการ</span>
+                        </div>
+                        <div class="mb-4">
+                            <div class="relative w-full md:w-1/2">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><i class="fas fa-search text-gray-400"></i></div>
+                                <input type="text" id="reg2Search" onkeyup="filterReg2Table()" placeholder="พิมพ์ค้นหาชื่อ, เลขสมาชิก, หรือเบอร์โทร..." class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full pl-10 p-2.5 shadow-sm transition">
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto max-h-[500px] overflow-y-auto border rounded-xl shadow-sm">
+                            <table class="w-full text-left border-collapse text-sm" id="reg2Table">
+                                <thead class="sticky top-0 z-10 shadow-sm"><tr class="bg-emerald-100 text-emerald-800"><th class="p-3">เลขสมาชิก</th><th class="p-3">ชื่อ / กิจการ</th><th class="p-3">เบอร์โทร</th><th class="p-3 text-center">วันหมดอายุ</th><th class="p-3 text-center">เอกสารอ้างอิง</th></tr></thead>
+                                <tbody class="bg-white">`;
+            
+            if(!data.active || data.active.length === 0) {
+                 html += `<tr><td colspan="5" class="text-center py-8 text-gray-400">ยังไม่มีข้อมูลสมาชิกที่ได้รับการอนุมัติ</td></tr>`;
+            } else {
+                data.active.forEach(r => {
+                    let pdfBtn = r.pdfUrl ? `<a href="${r.pdfUrl}" target="_blank" class="inline-flex items-center bg-white border border-gray-300 hover:bg-purple-50 text-purple-700 text-[11px] font-bold px-2 py-1.5 rounded shadow-sm transition mr-1"><i class="fas fa-id-card text-purple-500 mr-1"></i> ใบสมัคร</a>` : `<span class="text-gray-400 text-[10px] bg-gray-100 px-2 py-1 rounded mr-1">ไม่มีใบสมัคร</span>`;
+                    let recBtn = r.receiptUrl ? `<a href="${r.receiptUrl}" target="_blank" class="inline-flex items-center bg-white border border-gray-300 hover:bg-green-50 text-green-700 text-[11px] font-bold px-2 py-1.5 rounded shadow-sm transition"><i class="fas fa-receipt text-green-500 mr-1"></i> ใบเสร็จ</a>` : `<span class="text-gray-400 text-[10px] bg-gray-100 px-2 py-1 rounded">ไม่มีใบเสร็จ</span>`;
+                    
+                    html += `<tr class="border-b hover:bg-emerald-50 transition reg2-row">
+                                <td class="p-3 font-mono text-emerald-700 font-bold">${r.memId || '-'}</td>
+                                <td class="p-3"><b>${r.name}</b><br><span class="text-[10px] text-gray-500">${r.type}</span></td>
+                                <td class="p-3">${r.mobile}</td>
+                                <td class="p-3 text-center text-red-600 font-medium">${r.expiryDate}</td>
+                                <td class="p-3 text-center align-middle whitespace-nowrap">${pdfBtn}${recBtn}</td>
+                            </tr>`;
+                });
+            }
+            html += `</tbody></table></div></div>`;
+            
+            document.getElementById('admin-content').innerHTML = html;
+        }
+
+        function filterReg2Table() {
+            let input = document.getElementById("reg2Search").value.toLowerCase();
+            let rows = document.querySelectorAll(".reg2-row");
+            rows.forEach(row => {
+                let text = row.innerText.toLowerCase();
+                row.style.display = text.includes(input) ? "" : "none";
+            });
+        }
+
+        let currentActiveData = [];
+
+        function renderDashboard(data) {
+            let html = `<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">`; 
+            html += `<div class="bg-green-50 p-4 border border-green-200 rounded-lg shadow-sm"><h3 class="font-bold text-green-800 border-b pb-2 mb-2"><i class="fas fa-chart-line mr-2"></i>ยอดเงินรวมรายปี</h3><ul class="text-sm space-y-1">`;
+            for (let year in data.revenue) { html += `<li class="flex justify-between"><span>ปี ${year}:</span> <span class="font-bold text-green-700">฿${data.revenue[year].toLocaleString(undefined, {minimumFractionDigits: 2})}</span></li>`; }
+            if (Object.keys(data.revenue).length === 0) html += `<li class="text-gray-500">ยังไม่มียอดรายได้</li>`;
+            html += `</ul></div>`;
+            
+            html += `<div class="bg-blue-50 p-4 border border-blue-200 rounded-lg shadow-sm"><div class="flex justify-between items-start mb-2 border-b pb-2 border-blue-200"><h3 class="font-bold text-blue-800"><i class="fas fa-users mr-2"></i>สมาชิกปกติ (Active)</h3><button type="button" onclick="showActiveMembers()" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 py-1 rounded shadow transition"><i class="fas fa-list mr-1"></i> ดูรายชื่อ</button></div><ul class="text-sm space-y-1">`;
+            html += `<li class="flex justify-between"><span>บุคคลธรรมดา:</span> <span class="font-bold text-blue-700">${data.cat['บุคคล'] || 0} ราย</span></li><li class="flex justify-between"><span>นิติบุคคล:</span> <span class="font-bold text-blue-700">${data.cat['นิติบุคคล'] || 0} ราย</span></li></ul></div>`;
+
+            html += `<div class="bg-red-50 p-4 border border-red-200 rounded-lg shadow-sm"><div class="flex justify-between items-start mb-2 border-b pb-2 border-red-200"><h3 class="font-bold text-red-800"><i class="fas fa-user-times mr-2"></i>สมาชิกที่หมดอายุ</h3><button type="button" onclick="showExpiredMembers()" class="bg-red-600 hover:bg-red-700 text-white text-[10px] px-2 py-1 rounded shadow transition"><i class="fas fa-list mr-1"></i> ดูรายชื่อ</button></div><ul class="text-sm space-y-1">`;
+            html += `<li class="flex justify-between"><span>บุคคลธรรมดา:</span> <span class="font-bold text-red-700">${data.expired['บุคคล'] || 0} ราย</span></li><li class="flex justify-between"><span>นิติบุคคล:</span> <span class="font-bold text-red-700">${data.expired['นิติบุคคล'] || 0} ราย</span></li></ul></div></div>`;
+
+            html += `<div class="bg-slate-100 p-5 rounded-lg border mb-4 shadow-sm"><label class="font-bold mb-2 block text-gray-800"><i class="fas fa-search mr-2"></i>ค้นหาสมาชิก (ชื่อ, นามสกุล หรือ เบอร์โทร)</label><div class="flex flex-col sm:flex-row gap-2"><input type="text" id="searchKeyword" class="form-input flex-1" placeholder="พิมพ์คำค้นหา..."><button type="button" onclick="executeSearch()" class="btn-primary sm:w-auto w-full"><i class="fas fa-search"></i> ค้นหา</button></div></div><div id="searchResultArea" class="overflow-x-auto text-sm"></div>`;
+            document.getElementById('admin-content').innerHTML = html;
+        }
+
+        function executeSearch() {
+            let kw = document.getElementById('searchKeyword').value;
+            if(!kw) return;
+            document.getElementById('searchResultArea').innerHTML = '<p class="text-blue-500"><i class="fas fa-spinner fa-spin mr-2"></i> กำลังค้นหา...</p>';
+            google.script.run.withSuccessHandler(res => {
+                if(res.length === 0) return document.getElementById('searchResultArea').innerHTML = '<p class="text-red-500 bg-red-50 p-3 rounded-lg"><i class="fas fa-exclamation-circle mr-2"></i>ไม่พบข้อมูลที่ตรงกับคำค้นหา</p>';
+                
+                let html = `<table class="w-full text-left border-collapse mt-4 shadow-sm"><tr class="bg-gray-200 text-gray-700"><th class="p-3 rounded-tl-lg">เลขสมาชิก</th><th class="p-3">ชื่อ-สกุล / กิจการ</th><th class="p-3">เบอร์โทร</th><th class="p-3">สถานะ</th><th class="p-3 rounded-tr-lg text-center">เอกสาร</th></tr>`;
+                
+                res.forEach(r => {
+                    let name = (r['ชื่อ'] || r['ชื่อกิจการ']) + ' ' + (r['นามสกุล'] || '');
+                    let mobile = r['เบอร์มือถือ'] || r['เบอร์โทรมือถือ (กิจการ)'] || '-';
+                    let memId = r['เลขทะเบียนสมาชิก'] || r['เลขสมาชิก'] || '-';
+                    let pdfUrl = r['ใบสมัคร PDF']; 
+                    
+                    let displayStatus = String(r['สถานะ']);
+                    if (displayStatus.includes("(สลิปยอดไม่ตรง)")) {
+                        displayStatus = displayStatus.replace("(สลิปยอดไม่ตรง)", "<span class='text-red-600 font-bold'>(สลิปยอดไม่ตรง)</span>");
+                    }
+                    if (displayStatus.includes("(สลิปซ้ำ)")) {
+                        displayStatus = displayStatus.replace("(สลิปซ้ำ)", "<span class='text-red-600 font-bold'>(สลิปซ้ำ)</span>");
+                    }
+
+                    let pdfBtn = pdfUrl ? `<a href="${pdfUrl}" target="_blank" class="inline-block bg-purple-600 hover:bg-purple-700 text-white text-[10px] px-2 py-1 rounded shadow transition mr-1"><i class="fas fa-id-card mr-1"></i>ใบสมัคร</a>` : `<span class="text-gray-400 text-xs mr-1">-</span>`;
+                    let recBtn = r['ใบเสร็จ PDF'] ? `<a href="${r['ใบเสร็จ PDF']}" target="_blank" class="inline-block bg-green-600 hover:bg-green-700 text-white text-[10px] px-2 py-1 rounded shadow transition"><i class="fas fa-receipt mr-1"></i>ใบเสร็จ</a>` : ``;
+
+                    html += `<tr class="border-b hover:bg-slate-50 transition"><td class="p-3 font-mono text-blue-700 font-bold">${memId}</td><td class="p-3">${name}</td><td class="p-3">${mobile}</td><td class="p-3"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">${displayStatus}</span></td><td class="p-3 text-center whitespace-nowrap">${pdfBtn}${recBtn}</td></tr>`;
+                });
+                document.getElementById('searchResultArea').innerHTML = html + `</table>`;
+            }).searchMemberAll(kw);
+        }
+
+        function showActiveMembers() {
+            document.getElementById('searchResultArea').innerHTML = '<p class="text-blue-500"><i class="fas fa-spinner fa-spin mr-2"></i> กำลังโหลดรายชื่อสมาชิก Active...</p>';
+            google.script.run.withSuccessHandler(res => {
+                if(res.length === 0) return document.getElementById('searchResultArea').innerHTML = '<p class="text-orange-500 bg-orange-50 p-3 rounded-lg"><i class="fas fa-info-circle mr-2"></i>ยังไม่มีสมาชิกสถานะ Active ในระบบ</p>';
+                currentActiveData = res;
+                let html = `<div class="mt-6 mb-2 flex justify-between items-end border-b pb-2">
+                                <div><h3 class="font-bold text-blue-800"><i class="fas fa-check-circle mr-2"></i> รายชื่อสมาชิกสถานะปกติ (Active)</h3><span class="text-sm text-gray-500">พบทั้งหมด ${res.length} รายการ</span></div>
+                                <button type="button" onclick="exportActiveToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg shadow-md transition"><i class="fas fa-file-excel mr-2"></i> Export Excel (CSV)</button>
+                            </div>`;
+                
+                html += `<div class="overflow-x-auto"><table class="w-full text-left border-collapse shadow-sm text-sm"><tr class="bg-blue-100 text-blue-800"><th class="p-3 rounded-tl-lg">ประเภท</th><th class="p-3">เลขสมาชิก</th><th class="p-3">ชื่อ / กิจการ</th><th class="p-3">เบอร์โทร</th><th class="p-3 text-center">วันหมดอายุ</th><th class="p-3 rounded-tr-lg text-center">เอกสาร</th></tr>`;
+                
+                res.forEach(r => {
+                    let pdfBtn = r.pdfUrl ? `<a href="${r.pdfUrl}" target="_blank" class="inline-block bg-purple-600 hover:bg-purple-700 text-white text-[10px] px-2 py-1 rounded shadow transition"><i class="fas fa-file-pdf mr-1"></i>ใบสมัคร</a>` : `<span class="text-gray-400 text-xs">-</span>`;
+                    
+                    html += `<tr class="border-b hover:bg-blue-50 transition"><td class="p-3"><span class="bg-white px-2 py-1 rounded border text-xs text-gray-600">${r.type}</span></td><td class="p-3 font-mono text-blue-700 font-bold">${r.memId}</td><td class="p-3"><b>${r.name}</b><br><span class="text-[10px] text-gray-400">ID: ${r.idNumber}</span></td><td class="p-3">${r.mobile}</td><td class="p-3 text-center text-red-600 font-medium">${r.expiryDate}</td><td class="p-3 text-center align-middle">${pdfBtn}</td></tr>`;
+                });
+                document.getElementById('searchResultArea').innerHTML = html + `</table></div>`;
+            }).getActiveMembers();
+        }
+
+        function exportActiveToCSV() {
+            if(currentActiveData.length === 0) return Swal.fire('เตือน', 'ไม่มีข้อมูลสำหรับดาวน์โหลด', 'warning');
+            let csvContent = "ประเภทสมาชิก,เลขสมาชิก,เลขประจำตัว/นิติบุคคล,ชื่อ/กิจการ,เบอร์โทร,สถานะ,วันหมดอายุ\n";
+            currentActiveData.forEach(r => {
+                let escapeText = (str) => `"${String(str || "").replace(/"/g, '""')}"`; let escapeNum = (str) => `="${String(str || "")}"`; 
+                csvContent += `${escapeText(r.type)},${escapeText(r.memId)},${escapeNum(r.idNumber)},${escapeText(r.name)},${escapeNum(r.mobile)},${escapeText(r.status)},${escapeText(r.expiryDate)}\n`;
+            });
+            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url); link.setAttribute("download", `รายชื่อสมาชิกหอการค้า_Active_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        function showExpiredMembers() {
+            document.getElementById('searchResultArea').innerHTML = '<p class="text-red-500"><i class="fas fa-spinner fa-spin mr-2"></i> กำลังโหลดรายชื่อผู้หมดอายุ...</p>';
+            google.script.run.withSuccessHandler(res => {
+                if(res.length === 0) return document.getElementById('searchResultArea').innerHTML = '<p class="text-green-600 bg-green-50 p-3 rounded-lg"><i class="fas fa-check-circle mr-2"></i>ไม่มีสมาชิกที่หมดอายุในขณะนี้</p>';
+                let html = `<div class="mt-6 mb-2 flex justify-between items-end"><h3 class="font-bold text-red-700"><i class="fas fa-list-ul mr-2"></i> รายชื่อสมาชิกที่หมดอายุ</h3><span class="text-sm text-gray-500">พบ ${res.length} รายการ</span></div>`;
+                html += `<table class="w-full text-left border-collapse shadow-sm"><tr class="bg-red-100 text-red-800"><th class="p-3 rounded-tl-lg">เลขสมาชิก</th><th class="p-3">ชื่อ / กิจการ</th><th class="p-3">ติดต่อ</th><th class="p-3">วันหมดอายุ</th><th class="p-3 rounded-tr-lg text-center">จัดการ</th></tr>`;
+                res.forEach(r => { html += `<tr class="border-b hover:bg-red-50 transition"><td class="p-3 font-mono text-red-700 font-bold">${r.memId}</td><td class="p-3"><b>${r.name}</b><br><span class="text-xs text-gray-500">${r.sheetName}</span></td><td class="p-3 text-sm"><i class="fas fa-phone-alt text-gray-400 mr-1"></i> ${r.mobile}<br><i class="fas fa-envelope text-gray-400 mr-1"></i> ${r.email || '-'}</td><td class="p-3 text-red-600">${r.expiryDate}</td><td class="p-3 text-center"><button type="button" onclick="confirmSendEmail('${r.email}', '${r.name}', '${r.expiryDate}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-xs shadow-sm transition"><i class="fas fa-paper-plane mr-1"></i> ส่งอีเมลแจ้งเตือน</button></td></tr>`; });
+                document.getElementById('searchResultArea').innerHTML = html + `</table>`;
+            }).getExpiredMembers();
+        }
+
+        function confirmSendEmail(email, name, expiryDate) {
+            if(!email || email === '-' || email === '') return Swal.fire('ไม่สามารถส่งได้', 'สมาชิกรายนี้ไม่มีข้อมูลอีเมลในระบบ กรุณาติดต่อผ่านเบอร์โทรศัพท์แทน', 'warning');
+            Swal.fire({ title: 'ยืนยันส่งอีเมลแจ้งเตือน?', html: `ระบบจะส่งอีเมลแจ้งเตือนหมดอายุไปยัง:<br><b class="text-blue-600">${email}</b>`, icon: 'question', showCancelButton: true, confirmButtonText: 'ส่งอีเมล', cancelButtonText: 'ยกเลิก' }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'กำลังส่งอีเมล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    google.script.run
+                        .withSuccessHandler(res => { if(res.success) Swal.fire('สำเร็จ', 'ส่งอีเมลแจ้งเตือนเรียบร้อยแล้ว', 'success'); else Swal.fire('เกิดข้อผิดพลาด', res.message, 'error'); })
+                        .withFailureHandler(err => Swal.fire('การเชื่อมต่อขัดข้อง', err.message, 'error'))
+                        .sendExpiryEmail(email, name, expiryDate);
+                }
+            });
+        }
+
+        function renderTable(list, mode) {
+            let html = ``;
+            
+            if (mode === 'reg1') {
+                html += `<div class="flex justify-between items-end mb-4 px-1">
+                            <h3 class="font-bold text-gray-800"><i class="fas fa-list-ul mr-2"></i> รายชื่อเสนอคณะกรรมการพิจารณา</h3>
+                            <button type="button" onclick="downloadPendingExport()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg shadow-md transition"><i class="fas fa-file-excel mr-2"></i> Export Excel</button>
+                         </div>`;
+            }
+            
+            html += `<table class="w-full text-left border-collapse"><thead><tr class="bg-slate-100 border-b text-gray-700"><th class="p-3">ชื่อ / กิจการ</th><th class="p-3">ข้อมูลสถานะ</th><th class="p-3 text-center">จัดการ</th></tr></thead><tbody>`;
+            
+            if(!list || list.length === 0) {
+                html += `<tr><td colspan="3" class="text-center py-8 text-gray-400 bg-slate-50"><i class="fas fa-inbox text-2xl block mb-2"></i>ไม่มีรายการรอตรวจสอบ</td></tr>`;
+            } else {
+                list.forEach(r => {
+                    let displayStatus = r.status;
+                    if (displayStatus.includes("(สลิปยอดไม่ตรง)")) {
+                        displayStatus = displayStatus.replace("(สลิปยอดไม่ตรง)", "<span class='text-red-600 font-bold'>(สลิปยอดไม่ตรง)</span>");
+                    }
+                    if (displayStatus.includes("(สลิปซ้ำ)")) {
+                        displayStatus = displayStatus.replace("(สลิปซ้ำ)", "<span class='text-red-600 font-bold'>(สลิปซ้ำ)</span>");
+                    }
+
+                    html += `<tr class="border-b hover:bg-slate-50 transition">
+                                <td class="p-3"><b>${r.name}</b><br><span class="text-xs px-2 py-0.5 bg-gray-200 rounded text-gray-600">${r.type}</span></td>
+                                <td class="p-3 text-sm text-gray-700"><span class="text-xs text-gray-500 block mb-1">สถานะปัจจุบัน:</span> <span class="font-medium">${displayStatus}</span><br>`;
+                    
+                    if(mode === 'tre') {
+                        html += `<span class="font-bold text-blue-600 mt-1 block font-mono bg-blue-50 inline-block px-2 py-0.5 rounded">ยอดโอน: ฿${parseFloat(r.fee || 0).toFixed(2)}</span>`;
+                    }
+                    
+                    html += `</td><td class="p-3 text-center align-middle">`;
+                    
+                    if (mode === 'reg1') { 
+                        html += `<button type="button" onclick="adminAction('approveByRegistrar', [${r.rowId}, '${r.sheetName}', true], 'อนุมัติ (สมาชิกใหม่)')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs mr-1 mb-1 hover:bg-blue-700 shadow-sm transition"><i class="fas fa-check mr-1"></i>อนุมัติ(ใหม่)</button>
+                                 <button type="button" onclick="adminAction('approveByRegistrar', [${r.rowId}, '${r.sheetName}', false], 'อนุมัติ (ต่ออายุ)')" class="bg-green-600 text-white px-2 py-1 rounded text-xs mr-1 mb-1 hover:bg-green-700 shadow-sm transition"><i class="fas fa-sync-alt mr-1"></i>อนุมัติ(เก่า)</button>
+                                 <button type="button" onclick="confirmReject(${r.rowId}, '${r.sheetName}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs mb-1 hover:bg-red-600 shadow-sm transition"><i class="fas fa-times mr-1"></i>ไม่อนุมัติ</button>`;
+                    } 
+                    else if (mode === 'tre') { 
+                        let isNewTag = String(r.status).includes("ใหม่") ? " (สมาชิกใหม่)" : " (ต่ออายุ)";
+                        let isErrorState = r.status.includes("ชำระเงินไม่ถูกต้อง") || r.status.includes("สลิปไม่ถูกต้อง");
+                        
+                        if (r.slipUrl) {
+                            html += `<a href="${r.slipUrl}" target="_blank" class="bg-gray-500 text-white px-2 py-1.5 rounded text-xs mb-2 inline-block hover:bg-gray-600 shadow-sm transition"><i class="fas fa-image mr-1"></i>ดูสลิป</a><br>`;
+                        }
+                        
+                        if (isErrorState && currentAdminRole !== 'admin') {
+                            html += `<button type="button" onclick="adminAction('resendRejectEmail', [${r.rowId}, '${r.sheetName}', '${r.status}'], 'ส่งอีเมลแจ้งสมาชิกให้แนบสลิปใหม่อีกครั้ง')" class="bg-blue-600 text-white px-3 py-1.5 rounded text-xs mb-1 hover:bg-blue-700 shadow-sm transition"><i class="fas fa-paper-plane mr-1"></i>ส่งอีเมลแจ้งเตือนอีกครั้ง</button>`;
+                        } 
+                        else {
+                            html += `<button type="button" onclick="confirmTrePayment(${r.rowId}, '${r.sheetName}', ${r.fee || 0}, '${r.status}')" class="bg-green-600 text-white px-2 py-1 rounded text-xs mr-1 mb-1 hover:bg-green-700 shadow-sm transition"><i class="fas fa-check-circle mr-1"></i>เงินเข้าแล้ว / ปรับยอด</button>
+                                     <button type="button" onclick="adminAction('changeStatus', [${r.rowId}, '${r.sheetName}', 'ชำระเงินไม่ถูกต้อง${isNewTag}'], 'ปฏิเสธยอดเงิน')" class="bg-orange-500 text-white px-2 py-1 rounded text-xs mr-1 mb-1 hover:bg-orange-600 shadow-sm transition"><i class="fas fa-exclamation-triangle mr-1"></i>ยอดผิด</button>
+                                     <button type="button" onclick="adminAction('changeStatus', [${r.rowId}, '${r.sheetName}', 'สลิปไม่ถูกต้อง${isNewTag}'], 'ปฏิเสธสลิป')" class="bg-red-500 text-white px-2 py-1 rounded text-xs mb-1 hover:bg-red-600 shadow-sm transition"><i class="fas fa-times-circle mr-1"></i>สลิปผิด</button>`;
+                            
+                            if (isErrorState && currentAdminRole === 'admin') {
+                                html += `<br><button type="button" onclick="adminAction('resendRejectEmail', [${r.rowId}, '${r.sheetName}', '${r.status}'], 'ส่งอีเมลแจ้งสมาชิกให้แนบสลิปใหม่อีกครั้ง')" class="bg-blue-600 text-white px-3 py-1.5 rounded text-xs mt-1 mb-1 hover:bg-blue-700 shadow-sm transition"><i class="fas fa-paper-plane mr-1"></i>ส่งอีเมลแจ้งเตือนอีกครั้ง</button>`;
+                            }
+                        }
+                    } 
+                    else if (mode === 'reg2') { 
+                        html += `<button type="button" onclick="adminAction('generateIdAndPDF', [${r.rowId}, '${r.sheetName}'], 'ออกเลขและ PDF', true)" class="bg-purple-600 text-white px-4 py-2 rounded text-sm font-bold shadow-md hover:bg-purple-700 transition"><i class="fas fa-id-card-alt mr-2"></i>ออกเลข & Gen PDF</button>`;
+                    }
+                    html += `</td></tr>`;
+                });
+            }
+            document.getElementById('admin-content').innerHTML = html + `</tbody></table>`;
+        }
+
+        function adminAction(funcName, args, confirmText, openUrl = false) {
+            Swal.fire({ title: `ยืนยัน: ${confirmText}?`, icon: 'question', showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก' }).then(res => {
+                if(res.isConfirmed) {
+                    Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen:()=>Swal.showLoading()});
+                    const successHandler = function(res) {
+                        if(res.success !== false) {
+                            if(openUrl && res.url) window.open(res.url, '_blank');
+                            Swal.fire('สำเร็จ', 'ดำเนินการเรียบร้อย', 'success'); 
+                            const activeTabId = document.querySelector('.admin-tab.active').id.replace('btn-', '');
+                            switchAdmin(activeTabId);
+                        } else { Swal.fire('เกิดข้อผิดพลาด', res.message, 'error'); }
+                    };
+                    const errorHandler = function(err) { Swal.fire('การเชื่อมต่อขัดข้อง', err.message, 'error'); };
+
+                    if (funcName === 'approveByRegistrar') google.script.run.withSuccessHandler(successHandler).withFailureHandler(errorHandler).approveByRegistrar(args[0], args[1], args[2]);
+                    else if (funcName === 'changeStatus') google.script.run.withSuccessHandler(successHandler).withFailureHandler(errorHandler).changeStatus(args[0], args[1], args[2]);
+                    else if (funcName === 'generateIdAndPDF') google.script.run.withSuccessHandler(successHandler).withFailureHandler(errorHandler).generateIdAndPDF(args[0], args[1]);
+                    else if (funcName === 'resendRejectEmail') google.script.run.withSuccessHandler(successHandler).withFailureHandler(errorHandler).resendRejectEmail(args[0], args[1], args[2]);
+                }
+            });
+        }
+
+        function confirmTrePayment(rowId, sheetName, currentFee, statusStr) {
+            let isNewTag = statusStr.includes("ใหม่") ? " (สมาชิกใหม่)" : " (ต่ออายุ)";
+            let newStatus = 'รอออกเลขสมาชิก' + isNewTag;
+
+            Swal.fire({
+                title: 'ยืนยันยอดเงินที่ได้รับ',
+                html: 'กรุณาตรวจสอบสลิปแล้วระบุยอดเงิน <b>สุทธิที่ได้รับจริง</b><br><span class="text-sm text-gray-500">(สามารถแก้ไขตัวเลขให้ตรงกับสลิปได้)</span>',
+                input: 'number',
+                inputValue: currentFee, 
+                inputAttributes: {
+                    step: '0.01', 
+                    min: '0'
+                },
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-save mr-1"></i> ยืนยันและบันทึก',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#16a34a'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let actualFee = result.value;
+                    if (!actualFee || actualFee <= 0) {
+                         return Swal.fire('ข้อผิดพลาด', 'กรุณาระบุยอดเงินให้ถูกต้อง', 'error');
+                    }
+                    
+                    Swal.fire({ title: 'กำลังบันทึกยอดเงิน...', allowOutsideClick: false, didOpen:()=>Swal.showLoading()});
+                    google.script.run.withSuccessHandler(res => {
+                        if(res.success) {
+                            Swal.fire('สำเร็จ', 'บันทึกยอดเงินและปรับสถานะเรียบร้อย', 'success');
+                            switchAdmin('tre'); 
+                        } else {
+                            Swal.fire('เกิดข้อผิดพลาด', res.message, 'error');
+                        }
+                    }).withFailureHandler(err => Swal.fire('การเชื่อมต่อขัดข้อง', err.message, 'error'))
+                    .confirmPayment(rowId, sheetName, newStatus, actualFee);
+                }
+            });
+        }
+
+        function confirmReject(rowId, sheetName) {
+            Swal.fire({
+                title: 'ไม่อนุมัติการสมัคร',
+                text: 'กรุณาระบุเหตุผล (ระบบจะส่งอีเมลแจ้งผู้สมัคร)',
+                input: 'textarea',
+                inputPlaceholder: 'พิมพ์เหตุผลที่นี่...',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-paper-plane mr-1"></i> ยืนยันและส่งอีเมล',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#dc2626',
+                preConfirm: (reason) => {
+                    if (!reason || reason.trim() === '') {
+                        Swal.showValidationMessage('กรุณาระบุเหตุผลการไม่อนุมัติ');
+                    }
+                    return reason;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'กำลังบันทึกและส่งอีเมล...', allowOutsideClick: false, didOpen:()=>Swal.showLoading()});
+                    google.script.run.withSuccessHandler(res => {
+                        if(res.success) {
+                            Swal.fire('สำเร็จ', 'บันทึกสถานะและส่งอีเมลเรียบร้อยแล้ว', 'success'); 
+                            const activeTabId = document.querySelector('.admin-tab.active').id.replace('btn-', '');
+                            switchAdmin(activeTabId);
+                        } else { Swal.fire('เกิดข้อผิดพลาด', res.message, 'error'); }
+                    }).withFailureHandler(err => Swal.fire('การเชื่อมต่อขัดข้อง', err.message, 'error'))
+                    .rejectApplication(rowId, sheetName, result.value); 
+                }
+            });
+        }
+
+        function downloadPendingExport() {
+            Swal.fire({ title: 'กำลังเตรียมไฟล์ข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            google.script.run
+                .withSuccessHandler(data => {
+                    Swal.close();
+                    if(data.length === 0) return Swal.fire('เตือน', 'ไม่มีข้อมูลรออนุมัติสำหรับดาวน์โหลด', 'warning');
+                    
+                    let csvContent = "รูปแบบ,ประเภทการสมัคร,เลขประจำตัว/นิติบุคคล,ชื่อ/กิจการ,เบอร์โทร,สถานะ\n";
+                    data.forEach(r => {
+                        let escapeText = (str) => `"${String(str || "").replace(/"/g, '""')}"`; let escapeNum = (str) => `="${String(str || "")}"`; 
+                        csvContent += `${escapeText(r.formType)},${escapeText(r.category)},${escapeNum(r.idNumber)},${escapeText(r.name)},${escapeNum(r.mobile)},${escapeText(r.status)}\n`;
+                    });
+
+                    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url); link.setAttribute("download", `รายชื่อรอพิจารณาอนุมัติ_${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                })
+                .withFailureHandler(err => Swal.fire('ข้อผิดพลาด', err.message, 'error'))
+                .getPendingApprovalForExport();
+        }
+        
+        // =========================================
+        // 🌟 ระบบจัดการการอุทธรณ์ (Appeal System)
+        // =========================================
+        
+        function handleAppealAction(isAppeal) {
+            if (isAppeal) {
+                Swal.fire({
+                    title: 'ยื่นอุทธรณ์การพิจารณา',
+                    text: 'กรุณาระบุเหตุผลการยื่นอุทธรณ์ เพื่อให้คณะกรรมการพิจารณาใหม่อีกครั้ง',
+                    input: 'textarea',
+                    inputPlaceholder: 'พิมพ์เหตุผลที่นี่...',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-paper-plane mr-1"></i> ยืนยันการอุทธรณ์',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: '#2563eb',
+                    preConfirm: (reason) => {
+                        if (!reason || reason.trim() === '') {
+                            Swal.showValidationMessage('กรุณาระบุเหตุผลการอุทธรณ์');
+                        }
+                        return reason;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        submitAppealToBackend(true, result.value);
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'ยืนยันไม่อุทธรณ์',
+                    text: 'หากท่านเลือกไม่อุทธรณ์ การพิจารณาจะถือเป็นที่สิ้นสุด และไม่สามารถแก้ไขได้อีก',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'ยืนยัน ไม่อุทธรณ์',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: '#dc2626'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        submitAppealToBackend(false, '');
+                    }
+                });
+            }
+        }
+
+        function submitAppealToBackend(isAppeal, reason) {
+            Swal.fire({ title: 'กำลังดำเนินการ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            google.script.run
+                .withSuccessHandler(res => {
+                    if (res.success) {
+                        Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success').then(() => {
+                            resetSystem();
+                        });
+                    } else {
+                        Swal.fire('ข้อผิดพลาด', res.message, 'error');
+                    }
+                })
+                .withFailureHandler(err => Swal.fire('การเชื่อมต่อขัดข้อง', err.message, 'error'))
+                .submitAppeal(formData.idNumber, formData.membershipType, isAppeal, reason);
+        }
+
+        // =========================================
+        // 🌟 ฟังก์ชันยืนยันตัวตนเพื่อดูเอกสารส่วนบุคคล
+        // =========================================
+        
+        function verifyPhoneToDownload(fileUrl) {
+            let actualPhone = String(formData.mobileToCalc).replace(/\D/g, '');
+            if(!actualPhone) return Swal.fire('ข้อผิดพลาด', 'ไม่พบเบอร์โทรศัพท์ในระบบ ไม่สามารถยืนยันตัวตนได้ กรุณาติดต่อเจ้าหน้าที่', 'error');
+
+            Swal.fire({
+                title: 'ยืนยันตัวตน', 
+                text: 'เพื่อความปลอดภัยของข้อมูลส่วนบุคคล กรุณากรอกเบอร์โทรศัพท์ที่ใช้ลงทะเบียนไว้เพื่อเปิดดูเอกสาร', 
+                input: 'tel',
+                inputAttributes: { maxlength: 10, placeholder: '081xxxxxxx' }, 
+                showCancelButton: true, 
+                confirmButtonText: '<i class="fas fa-unlock mr-1"></i> ยืนยัน', 
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#2563eb'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    let inputPhone = String(res.value).replace(/\D/g, '');
+                    if (inputPhone === actualPhone) {
+                        Swal.fire({
+                            title: 'ยืนยันตัวตนสำเร็จ',
+                            text: 'ระบบกำลังเปิดเอกสารให้ท่าน...',
+                            icon: 'success',
+                            timer: 1000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            let previewUrl = fileUrl;
+                            if (fileUrl.includes('/view')) {
+                                previewUrl = fileUrl.substring(0, fileUrl.indexOf('/view')) + '/preview';
+                            }
+                            window.location.href = previewUrl; 
+                        });
+                    } else { 
+                        Swal.fire('ข้อมูลไม่ถูกต้อง', 'เบอร์โทรศัพท์ไม่ตรงกับในระบบ', 'error'); 
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
