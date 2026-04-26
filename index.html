@@ -147,7 +147,11 @@
                                 <input type="text" id="website" class="form-input" value="-" onblur="validateSocialUI(this, 'web')">
                                 <p id="website-error" class="text-[11px] text-orange-500 mt-1 hidden font-medium"><i class="fas fa-exclamation-triangle"></i> รูปแบบเว็บไซต์ควรมี www. หรือ http</p>
                             </div>
-                        </div>
+                            <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-100">
+                                <label class="block text-sm font-bold text-purple-700 mb-1"><i class="fas fa-gift mr-1"></i> ผู้แนะนำให้สมัคร (ถ้ามี)</label>
+                                <input type="text" id="referrerPersonal" class="form-input border-purple-300 bg-purple-50 focus:bg-white" placeholder="ระบุ ชื่อ-นามสกุล หรือ รหัสสมาชิก ของผู้แนะนำ">
+                            </div>
+                        </div>      
                     </div>
                 </div>
 
@@ -204,6 +208,10 @@
                                 <label class="block text-sm font-medium mb-1">Website</label>
                                 <input type="text" id="websiteCorp" class="form-input" value="-" onblur="validateSocialUI(this, 'web')">
                                 <p id="websiteCorp-error" class="text-[11px] text-orange-500 mt-1 hidden font-medium"><i class="fas fa-exclamation-triangle"></i> รูปแบบเว็บไซต์ควรมี www. หรือ http</p>
+                            </div>
+                            <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-100">
+                                <label class="block text-sm font-bold text-purple-700 mb-1"><i class="fas fa-gift mr-1"></i> ผู้แนะนำให้สมัคร (ถ้ามี)</label>
+                                <input type="text" id="referrerCorp" class="form-input border-purple-300 bg-purple-50 focus:bg-white" placeholder="ระบุ ชื่อ-นามสกุล หรือ รหัสสมาชิก ของผู้แนะนำ">
                             </div>
                         </div>
                     </div>
@@ -870,6 +878,9 @@
             const getVal = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
             let inputs = {};
             
+            // ==========================================
+            // 1. ดึงและตรวจสอบข้อมูล (นิติบุคคล)
+            // ==========================================
             if (formData.membershipType === 'นิติบุคคล') {
                 inputs = {
                     corpType: getVal('corpType'), corpName: getVal('corpName'), businessType: getVal('businessType'), brandName: getVal('brandName'),
@@ -904,6 +915,9 @@
                     return Swal.fire('ข้อมูลไม่ถูกต้อง', 'เบอร์โทรผู้ติดต่อประสานงาน ต้องมี 10 หลัก และขึ้นต้นด้วย 0', 'warning');
                 }
 
+            // ==========================================
+            // 2. ดึงและตรวจสอบข้อมูล (บุคคลธรรมดา)
+            // ==========================================
             } else {
                 inputs = {
                     title: getVal('title'), firstName: getVal('firstName'), lastName: getVal('lastName'), nationality: getVal('nationality'),
@@ -926,15 +940,24 @@
                 }
             }
             
-            Object.assign(formData, inputs);
+            // ==========================================
+            // 3. รวมข้อมูล และ ดึงค่าผู้แนะนำ (Referrer)
+            // ==========================================
+            let refValue = formData.membershipType === 'นิติบุคคล' ? getVal('referrerCorp') : getVal('referrerPersonal');
+            Object.assign(formData, inputs, { referrer: refValue });
             
+            // แปลงรูปแบบวันที่หมดอายุบัตร
             let displayExpiry = inputs.idExpiryDate || '-';
             if (displayExpiry !== '-' && displayExpiry.includes('-')) {
                 let p = displayExpiry.split('-');
                 displayExpiry = `${p[2]}/${p[1]}/${p[0]}`;
             }
 
+            // ==========================================
+            // 4. สร้าง HTML สำหรับแสดงผลพรีวิว
+            // ==========================================
             let pHTML = `<div class="bg-white p-6 rounded-xl border shadow-sm text-sm"><table class="w-full text-left border-collapse">`;
+            
             let dataToPreview = formData.membershipType === 'นิติบุคคล' ? [
                 { label: 'ประเภทการสมัคร', val: `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">${formData.category} (นิติบุคคล)</span>` },
                 { label: 'เลขทะเบียนนิติบุคคล', val: formData.idNumber },
@@ -943,7 +966,8 @@
                 { label: 'ที่อยู่ตั้งกิจการ', val: `${inputs.addressCorp} ม.${inputs.mooCorp || '-'} ต.${inputs.subdistrictCorp} อ.${inputs.districtCorp} จ.${inputs.provinceCorp} ${inputs.zipcodeCorp}` },
                 { label: 'เบอร์โทรกิจการ', val: inputs.mobileCorp },
                 { label: 'อีเมลกิจการ', val: inputs.emailCorp },
-                { label: 'ผู้ติดต่อประสานงาน', val: `<b>${inputs.title1}${inputs.fname1} ${inputs.lname1}</b><br>เลขบัตรฯ: ${inputs.idCard1}<br>ตำแหน่ง: ${inputs.pos1}<br>โทร: ${inputs.phone1}<br>อีเมล: ${inputs.email1}` }
+                { label: 'ผู้ติดต่อประสานงาน', val: `<b>${inputs.title1}${inputs.fname1} ${inputs.lname1}</b><br>เลขบัตรฯ: ${inputs.idCard1}<br>ตำแหน่ง: ${inputs.pos1}<br>โทร: ${inputs.phone1}<br>อีเมล: ${inputs.email1}` },
+                { label: 'ผู้แนะนำ', val: `<span class="text-purple-600 font-bold">${formData.referrer || '-'}</span>` } // 🌟 แสดงผู้แนะนำนิติบุคคล
             ] : [
                 { label: 'ประเภทการสมัคร', val: `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">${formData.category} (บุคคลธรรมดา)</span>` },
                 { label: 'เลขประจำตัวประชาชน', val: formData.idNumber },
@@ -951,11 +975,16 @@
                 { label: 'วันหมดอายุบัตร', val: displayExpiry },
                 { label: 'ที่อยู่', val: `${inputs.address} ม.${inputs.moo || '-'} ต.${inputs.subdistrict} อ.${inputs.district} จ.${inputs.province} ${inputs.zipcode}` },
                 { label: 'เบอร์มือถือ', val: inputs.mobile },
-                { label: 'อีเมล', val: inputs.email }
+                { label: 'อีเมล', val: inputs.email },
+                { label: 'ผู้แนะนำ', val: `<span class="text-purple-600 font-bold">${formData.referrer || '-'}</span>` } // 🌟 แสดงผู้แนะนำบุคคลธรรมดา
             ];
 
-            dataToPreview.forEach(item => { pHTML += `<tr class="border-b"><td class="py-3 text-gray-500 font-medium w-1/3 align-top">${item.label}</td><td class="py-3 font-bold text-blue-900 align-top">${item.val || '-'}</td></tr>`; });
+            dataToPreview.forEach(item => { 
+                pHTML += `<tr class="border-b"><td class="py-3 text-gray-500 font-medium w-1/3 align-top">${item.label}</td><td class="py-3 font-bold text-blue-900 align-top">${item.val || '-'}</td></tr>`; 
+            });
             pHTML += `</table></div>`;
+            
+            // แสดงผลหน้าจอ
             document.getElementById('preview-data-area').innerHTML = pHTML;
             goTo('step-preview');
         }
@@ -1161,20 +1190,75 @@
 
         let currentActiveData = [];
 
+        // =========================================
+        // 🌟 2. ฟังก์ชันแสดงผลแดชบอร์ด (index.html)
+        // =========================================
         function renderDashboard(data) {
             let html = `<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">`; 
-            html += `<div class="bg-green-50 p-4 border border-green-200 rounded-lg shadow-sm"><h3 class="font-bold text-green-800 border-b pb-2 mb-2"><i class="fas fa-chart-line mr-2"></i>ยอดเงินรวมรายปี</h3><ul class="text-sm space-y-1">`;
-            for (let year in data.revenue) { html += `<li class="flex justify-between"><span>ปี ${year}:</span> <span class="font-bold text-green-700">฿${data.revenue[year].toLocaleString(undefined, {minimumFractionDigits: 2})}</span></li>`; }
+            
+            // กล่องที่ 1: ยอดเงินรวม
+            html += `<div class="bg-green-50 p-4 border border-green-200 rounded-lg shadow-sm">
+                        <h3 class="font-bold text-green-800 border-b pb-2 mb-2"><i class="fas fa-chart-line mr-2"></i>ยอดเงินรวมรายปี</h3>
+                        <ul class="text-sm space-y-1">`;
+            for (let year in data.revenue) { 
+                html += `<li class="flex justify-between"><span>ปี ${year}:</span> <span class="font-bold text-green-700">฿${data.revenue[year].toLocaleString(undefined, {minimumFractionDigits: 2})}</span></li>`; 
+            }
             if (Object.keys(data.revenue).length === 0) html += `<li class="text-gray-500">ยังไม่มียอดรายได้</li>`;
             html += `</ul></div>`;
             
-            html += `<div class="bg-blue-50 p-4 border border-blue-200 rounded-lg shadow-sm"><div class="flex justify-between items-start mb-2 border-b pb-2 border-blue-200"><h3 class="font-bold text-blue-800"><i class="fas fa-users mr-2"></i>สมาชิกปกติ (Active)</h3><button type="button" onclick="showActiveMembers()" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 py-1 rounded shadow transition"><i class="fas fa-list mr-1"></i> ดูรายชื่อ</button></div><ul class="text-sm space-y-1">`;
-            html += `<li class="flex justify-between"><span>บุคคลธรรมดา:</span> <span class="font-bold text-blue-700">${data.cat['บุคคล'] || 0} ราย</span></li><li class="flex justify-between"><span>นิติบุคคล:</span> <span class="font-bold text-blue-700">${data.cat['นิติบุคคล'] || 0} ราย</span></li></ul></div>`;
+            // กล่องที่ 2: สมาชิก Active
+            html += `<div class="bg-blue-50 p-4 border border-blue-200 rounded-lg shadow-sm">
+                        <div class="flex justify-between items-start mb-2 border-b pb-2 border-blue-200">
+                            <h3 class="font-bold text-blue-800"><i class="fas fa-users mr-2"></i>สมาชิกปกติ (Active)</h3>
+                            <button type="button" onclick="showActiveMembers()" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-2 py-1 rounded shadow transition"><i class="fas fa-list mr-1"></i> ดูรายชื่อ</button>
+                        </div>
+                        <ul class="text-sm space-y-1">`;
+            html += `<li class="flex justify-between"><span>บุคคลธรรมดา:</span> <span class="font-bold text-blue-700">${data.cat['บุคคล'] || 0} ราย</span></li>
+                     <li class="flex justify-between"><span>นิติบุคคล:</span> <span class="font-bold text-blue-700">${data.cat['นิติบุคคล'] || 0} ราย</span></li>
+                     </ul></div>`;
 
-            html += `<div class="bg-red-50 p-4 border border-red-200 rounded-lg shadow-sm"><div class="flex justify-between items-start mb-2 border-b pb-2 border-red-200"><h3 class="font-bold text-red-800"><i class="fas fa-user-times mr-2"></i>สมาชิกที่หมดอายุ</h3><button type="button" onclick="showExpiredMembers()" class="bg-red-600 hover:bg-red-700 text-white text-[10px] px-2 py-1 rounded shadow transition"><i class="fas fa-list mr-1"></i> ดูรายชื่อ</button></div><ul class="text-sm space-y-1">`;
-            html += `<li class="flex justify-between"><span>บุคคลธรรมดา:</span> <span class="font-bold text-red-700">${data.expired['บุคคล'] || 0} ราย</span></li><li class="flex justify-between"><span>นิติบุคคล:</span> <span class="font-bold text-red-700">${data.expired['นิติบุคคล'] || 0} ราย</span></li></ul></div></div>`;
+            // กล่องที่ 3: สมาชิกหมดอายุ
+            html += `<div class="bg-red-50 p-4 border border-red-200 rounded-lg shadow-sm">
+                        <div class="flex justify-between items-start mb-2 border-b pb-2 border-red-200">
+                            <h3 class="font-bold text-red-800"><i class="fas fa-user-times mr-2"></i>สมาชิกที่หมดอายุ</h3>
+                            <button type="button" onclick="showExpiredMembers()" class="bg-red-600 hover:bg-red-700 text-white text-[10px] px-2 py-1 rounded shadow transition"><i class="fas fa-list mr-1"></i> ดูรายชื่อ</button>
+                        </div>
+                        <ul class="text-sm space-y-1">`;
+            html += `<li class="flex justify-between"><span>บุคคลธรรมดา:</span> <span class="font-bold text-red-700">${data.expired['บุคคล'] || 0} ราย</span></li>
+                     <li class="flex justify-between"><span>นิติบุคคล:</span> <span class="font-bold text-red-700">${data.expired['นิติบุคคล'] || 0} ราย</span></li>
+                     </ul></div></div>`;
 
-            html += `<div class="bg-slate-100 p-5 rounded-lg border mb-4 shadow-sm"><label class="font-bold mb-2 block text-gray-800"><i class="fas fa-search mr-2"></i>ค้นหาสมาชิก (ชื่อ, นามสกุล หรือ เบอร์โทร)</label><div class="flex flex-col sm:flex-row gap-2"><input type="text" id="searchKeyword" class="form-input flex-1" placeholder="พิมพ์คำค้นหา..."><button type="button" onclick="executeSearch()" class="btn-primary sm:w-auto w-full"><i class="fas fa-search"></i> ค้นหา</button></div></div><div id="searchResultArea" class="overflow-x-auto text-sm"></div>`;
+            // 🌟 กล่องที่ 4 (ใหม่): Top 5 ผู้แนะนำ
+            html += `<div class="bg-purple-50 p-4 border border-purple-200 rounded-lg shadow-sm mb-6">
+                        <h3 class="font-bold text-purple-800 border-b pb-2 mb-3"><i class="fas fa-award mr-2"></i>สรุปยอดผู้แนะนำสมาชิก (Top 5)</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">`;
+            
+            if (data.referrers && data.referrers.length > 0) {
+                data.referrers.forEach((ref, idx) => {
+                    let medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '🏅'));
+                    html += `<div class="bg-white p-3 rounded shadow-sm border border-purple-100 flex flex-col items-center text-center hover:bg-purple-100 transition">
+                                <span class="text-3xl mb-1">${medal}</span>
+                                <span class="text-xs text-gray-600 font-medium truncate w-full mb-1" title="${ref.name}">${ref.name}</span>
+                                <span class="text-lg font-bold text-purple-700">${ref.count} <span class="text-[10px] font-normal text-gray-500">ราย</span></span>
+                             </div>`;
+                });
+            } else {
+                html += `<div class="col-span-2 sm:col-span-3 md:col-span-5 text-center text-gray-500 py-6 text-sm bg-white rounded border border-dashed border-gray-300">
+                            <i class="fas fa-user-friends text-2xl mb-2 text-gray-300 block"></i>ยังไม่มีข้อมูลผู้แนะนำในระบบ
+                         </div>`;
+            }
+            html += `</div></div>`; 
+
+            // กล่องค้นหาสมาชิก
+            html += `<div class="bg-slate-100 p-5 rounded-lg border mb-4 shadow-sm">
+                        <label class="font-bold mb-2 block text-gray-800"><i class="fas fa-search mr-2"></i>ค้นหาสมาชิก (ชื่อ, นามสกุล หรือ เบอร์โทร)</label>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="searchKeyword" class="form-input flex-1" placeholder="พิมพ์คำค้นหา...">
+                            <button type="button" onclick="executeSearch()" class="btn-primary sm:w-auto w-full"><i class="fas fa-search"></i> ค้นหา</button>
+                        </div>
+                     </div>
+                     <div id="searchResultArea" class="overflow-x-auto text-sm"></div>`;
+                     
             document.getElementById('admin-content').innerHTML = html;
         }
 
