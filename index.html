@@ -1291,8 +1291,13 @@
                         displayStatus = displayStatus.replace("(สลิปซ้ำ)", "<span class='text-red-600 font-bold'>(สลิปซ้ำ)</span>");
                     }
 
+                    // 🌟 เพิ่มการแสดงผลเบอร์โทรศัพท์ใต้ชื่อ (ตรง r.mobile)
                     html += `<tr class="border-b hover:bg-slate-50 transition">
-                                <td class="p-3"><b>${r.name}</b><br><span class="text-xs px-2 py-0.5 bg-gray-200 rounded text-gray-600">${r.type}</span></td>
+                                <td class="p-3">
+                                    <b>${r.name}</b><br>
+                                    <span class="text-xs px-2 py-0.5 bg-gray-200 rounded text-gray-600">${r.type}</span><br>
+                                    <span class="text-xs text-gray-500 mt-1 inline-block"><i class="fas fa-phone-alt"></i> ${r.mobile || '-'}</span>
+                                </td>
                                 <td class="p-3 text-sm text-gray-700"><span class="text-xs text-gray-500 block mb-1">สถานะปัจจุบัน:</span> <span class="font-medium">${displayStatus}</span><br>`;
                     
                     if(mode === 'tre') {
